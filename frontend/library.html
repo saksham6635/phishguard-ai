@@ -3,26 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#070b14" />
+  <meta name="theme-color" content="#e8edf2" />
   <title>Scam Library &amp; Training — PhishGuard</title>
   <meta name="description" content="Learn how voice-phishing scams work and test your instincts with the PhishGuard scam simulator." />
   <link rel="icon" type="image/svg+xml" href="assets/icons/icon-shield.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #070b14; --bg2: #0b1120;
-      --surface: rgba(255,255,255,.035); --surface2: rgba(255,255,255,.06);
-      --border: rgba(148,163,184,.14); --border2: rgba(148,163,184,.26);
-      --text: #e8edf6; --muted: #8b97ad; --faint: #5b6679;
-      --accent: #6d8dff; --accent2: #38d6ff;
-      --safe: 34,197,94; --warn: 245,158,11; --crit: 239,68,68;
+      --bg: #e8edf2; --bg2: #edf1f5;
+      --surface: #e8edf2; --surface2: #f0f3f6;
+      --border: #d4dce4; --border2: #bec9d4;
+      --text: #202a34; --muted: #526171; --faint: #667584;
+      --accent: #315d53; --accent2: #476778;
+      --safe: 31,107,73; --warn: 145,91,12; --crit: 164,55,50;
       --ease: cubic-bezier(.22,1,.36,1);
       --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
       --display: "Space Grotesk", "Inter", sans-serif;
       --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
     }
+
     *, *::before, *::after { box-sizing: border-box; }
     html { color-scheme: dark; }
     body { margin: 0; min-height: 100vh; font-family: var(--font); font-size: 15px; line-height: 1.55; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -34,23 +35,17 @@
     .ic { width: 1.1em; height: 1.1em; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
     /* ---------- Background ---------- */
-    .bg-glow { position: fixed; inset: 0; z-index: -1; pointer-events: none;
-      background:
-        radial-gradient(900px 500px at 10% -10%, rgba(109,141,255,.18), transparent 60%),
-        radial-gradient(700px 500px at 100% 10%, rgba(56,214,255,.10), transparent 60%),
-        radial-gradient(800px 600px at 50% 110%, rgba(109,141,255,.10), transparent 60%); }
-
     /* ---------- Navigation ---------- */
     .nav { position: sticky; top: 0; z-index: 50; background: rgba(7,11,20,.72); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
     .nav-inner { position: relative; max-width: 1200px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); font-family: var(--display); font-weight: 700; font-size: 19px; }
-    .nav-brand span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .nav-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: linear-gradient(140deg, var(--accent), var(--accent2)); box-shadow: 0 8px 20px -8px rgba(109,141,255,.7); }
+    .nav-brand span { color: var(--accent); }
+    .nav-mark { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: var(--accent); }
     .nav-mark .ic { font-size: 18px; }
     .nav-links { display: flex; gap: 4px; }
     .nav-links a { padding: 8px 14px; border-radius: 10px; color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; border: 1px solid transparent; transition: color .2s, background .2s; }
     .nav-links a:hover { color: var(--text); background: var(--surface2); }
-    .nav-links a.active { color: #fff; background: linear-gradient(135deg, rgba(91,123,255,.35), rgba(53,200,245,.18)); border-color: rgba(109,141,255,.35); }
+    .nav-links a.active { color: var(--accent); background: var(--bg); border-color: var(--border); }
     .nav-toggle { display: none; width: 40px; height: 40px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); place-items: center; }
     @media (max-width: 720px) {
       .nav-toggle { display: grid; }
@@ -66,27 +61,27 @@
     .hero p { color: var(--muted); max-width: 640px; font-size: 16px; }
     @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-    .card { background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02)); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 20px 50px -20px rgba(0,0,0,.7); }
+    .card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; box-shadow: 6px 6px 14px #cbd2da, -5px -5px 12px #fff; }
 
     /* ---------- Tabs ---------- */
     .tabs { display: inline-flex; gap: 4px; padding: 5px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 26px; }
     .tab { padding: 10px 18px; border-radius: 10px; border: 0; background: none; color: var(--muted); font-weight: 600; transition: all .25s var(--ease); }
     .tab:hover { color: var(--text); }
-    .tab.active { color: #fff; background: linear-gradient(135deg, #5b7bff, #35c8f5); box-shadow: 0 10px 24px -10px rgba(77,140,255,.8); }
+    .tab.active { color: var(--accent); background: var(--bg); box-shadow: inset 3px 3px 7px #cbd2da, inset -3px -3px 7px #fff; }
     .panel { animation: rise .5s var(--ease) both; }
 
     /* ---------- Playbook ---------- */
     .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 22px; }
     .search { flex: 1 1 320px; max-width: 460px; padding: 12px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); outline: none; transition: border-color .2s, box-shadow .2s; }
     .search::placeholder { color: var(--faint); }
-    .search:focus { border-color: rgba(109,141,255,.6); box-shadow: 0 0 0 4px rgba(109,141,255,.15); }
+    .search:focus { border-color: rgba(49,93,83,.6); box-shadow: 0 0 0 4px rgba(49,93,83,.12); }
     .chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip { padding: 7px 14px; border-radius: 999px; font-size: 13px; font-weight: 500; color: var(--muted); background: var(--surface); border: 1px solid var(--border); transition: all .2s; }
     .chip:hover { color: var(--text); border-color: var(--border2); }
-    .chip.active { color: #fff; background: rgba(109,141,255,.2); border-color: rgba(109,141,255,.5); }
+    .chip.active { color: var(--accent); background: rgba(49,93,83,.08); border-color: rgba(49,93,83,.35); }
 
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
-    .scam-card { padding: 22px; border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)); border: 1px solid var(--border); transition: transform .3s var(--ease), border-color .3s, box-shadow .3s; animation: rise .6s var(--ease) both; }
+    .scam-card { padding: 22px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); transition: all .3s ease; animation: none; }
     .scam-card:hover { transform: translateY(-4px); border-color: var(--border2); box-shadow: 0 24px 50px -24px rgba(0,0,0,.9); }
     .sc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .sc-ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 20px; color: var(--accent2); background: rgba(56,214,255,.1); border: 1px solid rgba(56,214,255,.2); }
@@ -98,8 +93,7 @@
     details { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
     summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--accent2); list-style: none; }
     summary::-webkit-details-marker { display: none; }
-    summary::after { content: "+"; float: right; color: var(--muted); }
-    details[open] summary::after { content: "–"; }
+    summary::after { content: none; }
     details h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin: 14px 0 8px; }
     details ul { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px; }
     .quotes li { font-family: var(--mono); font-size: 12.5px; color: var(--text); padding: 8px 10px; border-left: 2px solid rgba(var(--crit), .6); background: rgba(0,0,0,.2); border-radius: 0 8px 8px 0; }
@@ -116,7 +110,7 @@
     .sim-stats span { font-size: 13px; color: var(--muted); padding: 6px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); }
     .sim-stats b { color: var(--text); font-family: var(--mono); margin-left: 4px; }
     .progress { height: 6px; border-radius: 99px; background: var(--surface2); margin: 16px 0 22px; overflow: hidden; }
-    .progress i { display: block; height: 100%; width: 0; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .6s var(--ease); }
+    .progress i { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--accent); transition: width .6s var(--ease); }
     .caller-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
     .caller-label .ic { color: var(--accent2); }
     .transcript { display: flex; flex-direction: column; gap: 10px; }
@@ -134,26 +128,199 @@
     .choice-safe:hover { background: rgba(var(--safe), .12); border-color: rgba(var(--safe), .5); }
     .type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
     .type-btn { padding: 14px; border-radius: 12px; text-align: left; font-weight: 600; background: var(--surface); border: 1px solid var(--border2); transition: all .2s; }
-    .type-btn:hover { border-color: var(--accent); background: rgba(109,141,255,.1); }
+    .type-btn:hover { border-color: var(--accent); background: rgba(49,93,83,.08); }
     .feedback { margin-top: 22px; padding: 18px; border-radius: 16px; animation: rise .5s var(--ease) both; }
     .feedback.ok { background: rgba(var(--safe), .1); border: 1px solid rgba(var(--safe), .35); }
     .feedback.bad { background: rgba(var(--crit), .1); border: 1px solid rgba(var(--crit), .35); }
     .feedback strong { display: block; font-family: var(--display); font-size: 17px; margin-bottom: 6px; }
     .feedback p { color: var(--text); font-size: 14.5px; }
-    .btn { padding: 12px 22px; border-radius: 12px; border: 0; font-weight: 600; color: #fff; background: linear-gradient(135deg, #5b7bff, #35c8f5); box-shadow: 0 12px 26px -12px rgba(77,140,255,.8); transition: transform .2s var(--ease); }
+    .btn { padding: 12px 22px; border-radius: 9px; border: 0; font-weight: 600; color: #fff; background: var(--accent); box-shadow: 3px 3px 7px #cbd2da, -3px -3px 7px #fff; transition: all .3s ease; }
     .btn:hover { transform: translateY(-2px); }
     .btn-ghost { background: var(--surface); border: 1px solid var(--border2); color: var(--text); box-shadow: none; }
     .result { text-align: center; padding: 20px 10px; animation: rise .6s var(--ease) both; }
-    .result .score-big { font-family: var(--display); font-size: 72px; font-weight: 700; line-height: 1; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .result .score-big { font-family: var(--display); font-size: 72px; font-weight: 700; line-height: 1; color: var(--accent); }
     .result .badge { display: inline-block; margin: 14px 0 6px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; color: rgb(var(--safe)); background: rgba(var(--safe), .12); border: 1px solid rgba(var(--safe), .35); }
     .result p { color: var(--muted); margin-bottom: 20px; }
 
     .foot { text-align: center; color: var(--faint); font-size: 12px; padding: 24px; border-top: 1px solid var(--border); }
     @media (max-width: 560px) { .wrap { padding: 24px 16px 48px; } .sim { padding: 20px; } .result .score-big { font-size: 56px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+    /* ---------- Dark neumorphic system ---------- */
+    :root {
+      --bg: #1b2635; --bg2: #202d3d;
+      --surface: #1b2635; --surface2: #202d3d;
+      --border: rgba(190,207,230,.07); --border2: rgba(190,207,230,.13);
+      --soft-shadow: 10px 10px 22px #101722, -7px -7px 19px #263548;
+      --soft-inset: inset 5px 5px 12px #111a26, inset -5px -5px 12px #27364a;
+    }
+    body { background: var(--bg); }
+    .nav { background: rgba(27,38,53,.92); border-bottom-color: transparent; box-shadow: 0 8px 22px rgba(10,16,26,.28), 0 1px 0 rgba(190,207,230,.04); }
+    .nav-links { gap: 6px; padding: 5px; border-radius: 16px; background: var(--bg); box-shadow: var(--soft-inset); }
+    .nav-links a { border-radius: 11px; transition: all .3s ease; }
+    .nav-links a:hover { background: var(--bg2); box-shadow: 3px 3px 8px #111a26, -3px -3px 8px #27364a; }
+    .nav-links a.active { color: var(--accent2); background: var(--bg); border-color: transparent; box-shadow: var(--soft-inset); }
+    .nav-toggle { border: 0; box-shadow: 5px 5px 12px #111a26, -5px -5px 12px #27364a; transition: all .3s ease; }
+    .nav-toggle:active { box-shadow: var(--soft-inset); }
+    .card, .scam-card, .sim {
+      background: var(--bg);
+      border: 1px solid rgba(190,207,230,.045);
+      box-shadow: var(--soft-shadow), inset 1px 1px 0 rgba(190,207,230,.035);
+    }
+    .scam-card, .choice, .type-btn, .btn, .tab, .chip, .nav-links a { transition: all .3s ease; }
+    .scam-card:hover { transform: translateY(-2px); border-color: rgba(190,207,230,.12); box-shadow: 13px 13px 28px #101722, -8px -8px 21px #263548; }
+    .tabs { padding: 6px; background: var(--bg); border-color: transparent; box-shadow: var(--soft-inset); }
+    .tab { border-radius: 10px; }
+    .tab:hover { box-shadow: 3px 3px 8px #111a26, -3px -3px 8px #27364a; }
+    .tab.active { color: var(--accent2); background: var(--bg); box-shadow: var(--soft-inset); }
+    .search, .select { background: var(--bg); border-color: rgba(190,207,230,.07); box-shadow: var(--soft-inset); }
+    .search:focus, .select:focus { border-color: rgba(49,93,83,.55); box-shadow: var(--soft-inset), 0 0 0 3px rgba(49,93,83,.12); }
+    .chip { background: var(--bg); box-shadow: 3px 3px 8px #111a26, -3px -3px 8px #27364a; }
+    .chip.active { background: var(--bg); border-color: rgba(49,93,83,.4); box-shadow: var(--soft-inset); }
+    .choice, .type-btn { background: var(--bg); box-shadow: 5px 5px 12px #111a26, -5px -5px 12px #27364a; }
+    .choice:hover, .type-btn:hover { transform: translateY(-1px); }
+    .choice:active, .type-btn:active, .btn:active { transform: translateY(1px); box-shadow: var(--soft-inset); }
+    .btn { box-shadow: 5px 5px 12px #111a26, -5px -5px 12px #27364a; }
+    .btn-primary { background: var(--accent); box-shadow: 3px 3px 7px #cbd2da, -3px -3px 7px #fff; }
+    .btn-ghost { background: var(--bg); }
+    .nav-links a:focus-visible, .nav-toggle:focus-visible, .tab:focus-visible, .btn:focus-visible, .choice:focus-visible, .type-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 3px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+    @media (max-width: 720px) {
+      .nav-links { border-radius: 0 0 16px 16px; box-shadow: 0 12px 20px rgba(10,16,26,.45); }
+      .nav-links a.active { box-shadow: var(--soft-inset); }
+      .tabs { display: flex; width: 100%; }
+      .tab { flex: 1; padding-inline: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+    }
+    /* ---------- Product design system ---------- */
+    :root {
+      --bg: #e8edf2; --bg2: #edf1f5; --surface: #e8edf2; --surface2: #f0f3f6;
+      --border: #d4dce4; --border2: #bec9d4; --text: #202a34; --muted: #526171; --faint: #667584;
+      --accent: #315d53; --accent2: #476778; --safe: 31,107,73; --warn: 145,91,12; --crit: 164,55,50;
+      --display: var(--font);
+      --soft-shadow: 6px 6px 14px #cbd2da, -5px -5px 12px #fff;
+      --soft-inset: inset 3px 3px 7px #cbd2da, inset -3px -3px 7px #fff;
+      --radius: 14px;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px;
+    }
+    html { color-scheme: light; }
+    body { color: var(--text); background: var(--bg); }
+    .nav { background: var(--bg2); border-bottom: 1px solid var(--border); box-shadow: 0 3px 10px rgba(48,61,75,.06); backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .nav-inner { max-width: 1380px; min-height: 60px; padding-block: 10px; }
+    .nav-brand { color: var(--text); }
+    .nav-brand span { color: var(--accent); background: none; }
+    .nav-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); box-shadow: none; }
+    .nav-links { gap: 4px; }
+    .nav-links a { border-radius: 8px; transition: all .3s ease; }
+    .nav-links a:hover { color: var(--text); background: var(--surface2); }
+    .nav-links a.active { color: var(--accent); background: var(--bg); border-color: var(--border); box-shadow: var(--soft-inset); }
+    .nav-toggle { border: 1px solid var(--border); border-radius: 8px; background: var(--bg); box-shadow: var(--soft-shadow); transition: all .3s ease; }
+    .nav-toggle:active { box-shadow: var(--soft-inset); }
+    .wrap { max-width: 1380px; padding: 32px 32px 56px; }
+    .hero { margin-bottom: 22px; animation: none; }
+    .eyebrow { color: var(--accent2); font-size: 10px; letter-spacing: .12em; }
+    .hero h1 { margin-top: 6px; font-size: clamp(26px, 3.2vw, 36px); letter-spacing: -.025em; }
+    .hero p { color: var(--muted); font-size: 14px; }
+    .card, .scam-card, .sim {
+      background: var(--bg); border: 1px solid rgba(181,193,205,.6); border-radius: var(--radius);
+      box-shadow: var(--soft-shadow); animation: none;
+    }
+    .tabs { gap: 4px; padding: 5px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); box-shadow: var(--soft-inset); }
+    .tab { padding: 9px 14px; border-radius: 7px; color: var(--muted); transition: all .3s ease; }
+    .tab:hover { color: var(--text); background: var(--surface2); }
+    .tab.active { color: var(--accent); background: var(--bg); box-shadow: var(--soft-inset); }
+    .toolbar { gap: 16px; }
+    .library-search-form { display: flex; align-items: center; gap: 8px; flex: 1 1 320px; max-width: 460px; min-width: 0; }
+    .library-search-form .search { width: 100%; max-width: none; min-width: 0; flex: 1 1 auto; }
+    .library-search-submit { flex: none; padding: 10px 14px; border: 1px solid var(--border); border-radius: 9px; color: var(--accent); background: var(--bg); font-weight: 600; box-shadow: var(--soft-shadow); transition: all .25s ease; }
+    .library-search-submit:hover { background: var(--surface2); border-color: var(--border2); }
+    .library-search-submit:active { box-shadow: var(--soft-inset); transform: translateY(1px); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .mechanism { color: var(--text); font-size: 13.5px; line-height: 1.6; }
+    .search { background: var(--bg); border-color: var(--border); border-radius: 9px; box-shadow: var(--soft-inset); }
+    .search:focus { border-color: #315d53; box-shadow: var(--soft-inset), 0 0 0 3px rgba(49,93,83,.12); }
+    .chips { gap: 8px; }
+    .chip { color: var(--muted); background: var(--bg); border-color: var(--border); transition: all .3s ease; }
+    .chip:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+    .chip.active { color: var(--accent); background: var(--bg); border-color: var(--border2); box-shadow: var(--soft-inset); }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+    .scam-card { padding: 20px; border-radius: 12px; transition: all .3s ease; }
+    .scam-card:hover { transform: translateY(-2px); border-color: var(--border2); box-shadow: 8px 8px 18px #c5cdd6, -6px -6px 14px #fff; }
+    .scam-card h3 { font-size: 16px; }
+    .sc-sum { color: var(--muted); font-size: 13px; }
+    .sc-ic { color: var(--accent); background: rgba(49,93,83,.08); border-color: rgba(49,93,83,.18); border-radius: 9px; }
+    .pill-high { color: #8e302c; background: rgba(var(--crit),.08); border-color: rgba(var(--crit),.24); }
+    .pill-medium { color: #80520b; background: rgba(var(--warn),.08); border-color: rgba(var(--warn),.24); }
+    details { border-color: var(--border); }
+    summary { color: var(--accent); }
+    .quotes li { color: var(--text); background: var(--bg2); }
+    .sim { padding: 24px; }
+    .sim-stats span { color: var(--muted); background: var(--bg2); border-color: var(--border); border-radius: 8px; }
+    .progress { background: #d3dbe3; }
+    .progress i { background: var(--accent); }
+    .bubble { color: var(--text); background: var(--bg2); border-color: var(--border); border-radius: 5px 12px 12px; animation: none; }
+    .choice, .type-btn {
+      color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 9px;
+      box-shadow: 3px 3px 7px #cbd2da, -3px -3px 7px #fff; transition: all .3s ease;
+    }
+    .choice:hover, .type-btn:hover { transform: translateY(-1px); background: var(--bg2); }
+    .choice:active, .type-btn:active { transform: translateY(1px); box-shadow: var(--soft-inset); }
+    .choice-scam:hover { color: #8e302c; background: rgba(var(--crit),.06); border-color: rgba(var(--crit),.36); }
+    .choice-safe:hover { color: #1e6748; background: rgba(var(--safe),.06); border-color: rgba(var(--safe),.3); }
+    .type-btn:hover { border-color: rgba(49,93,83,.42); }
+    .feedback, .feedback.ok, .feedback.bad { border-radius: 10px; }
+    .result .score-big { color: var(--accent); background: none; -webkit-background-clip: initial; background-clip: initial; }
+    .btn { border-radius: 9px; transition: all .3s ease; }
+    .btn:not(.btn-ghost) { background: var(--accent); box-shadow: 3px 3px 7px #cbd2da, -3px -3px 7px #fff; }
+    .btn:not(.btn-ghost):hover { background: #284f47; transform: translateY(-1px); }
+    .btn:active { transform: translateY(1px); box-shadow: var(--soft-inset); }
+    .btn-ghost { color: var(--text); background: var(--bg); border-color: var(--border); box-shadow: var(--soft-shadow); }
+    :focus-visible { outline: 3px solid #1d5fbf; outline-offset: 3px; }
+    .foot { color: var(--muted); border-color: var(--border); }
+    @media (max-width: 720px) {
+      .nav-inner { padding-inline: 16px; }
+      .nav-links { padding: 10px 16px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); box-shadow: 0 6px 12px rgba(48,61,75,.1); }
+      .nav-links a.active { box-shadow: var(--soft-inset); }
+      .wrap { padding: 24px 18px 40px; }
+      .tabs { display: flex; width: 100%; }
+      .tab { flex: 1; padding-inline: 8px; }
+    }
+    @media (max-width: 560px) { .wrap { padding: 20px 14px 36px; } .sim { padding: 18px; } }
+    .nav-menu { position: relative; display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .nav-toggle { display: grid; }
+    .nav-links.closed { display: none; }
+    .scam-card details > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; }
+    .expand-icon { width: 18px; height: 18px; color: var(--accent); transition: transform .25s ease; }
+    details[open] > summary .expand-icon { transform: rotate(180deg); }
+    .scam-card details[open] > summary { margin-bottom: 4px; }
+    .scam-card details h4 { margin-top: 16px; }
+    @media (max-width: 720px) {
+      .nav-menu { position: static; }
+      .nav-links { top: calc(100% + 8px); right: 16px; left: auto; width: min(280px, calc(100vw - 32px)); padding: 8px; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--soft-shadow); }
+      .nav-links.open { display: flex; }
+      .library-search-form { flex-basis: 100%; max-width: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
   </style>
+  <link rel="stylesheet" href="css/ambient-background.css" />
 </head>
 <body>
+    <div class="telemetry-strip" aria-hidden="true"></div>
+  <div class="hud-corner tl" aria-hidden="true">
+    <span class="hud-crosshair"></span>SYS.VOICE // 48kHz REAL-TIME ASR
+  </div>
+  <div class="hud-corner tr" aria-hidden="true">
+    DETECTOR // MULTI-LAYER NLP &lt;180MS<span class="hud-crosshair"></span>
+  </div>
+  <div class="hud-corner bl" aria-hidden="true">
+    <span class="hud-crosshair"></span>PHISHGUARD.AI // REAL-TIME CALL SHIELD
+  </div>
+  <div class="hud-corner br" aria-hidden="true">
+    STATUS: ARMED // ZERO SERVER RETENTION<span class="hud-crosshair"></span>
+  </div>
+  <canvas id="ambient-dots-canvas" aria-hidden="true"></canvas>
   <!-- Icon sprite -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
@@ -167,27 +334,63 @@
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
     <symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" x2="20" y1="7" y2="7"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="17" y2="17"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
   </svg>
 
   <!-- ============ NAVIGATION ============ -->
-  <header class="nav">
+    <!-- ============ UNIFIED NAVBAR (Identical to index.html & app.html) ============ -->
+  <header class="navbar" id="appNavbar">
     <div class="nav-inner">
-      <a class="nav-brand" href="index.html">
-        <span class="nav-mark"><svg class="ic"><use href="#i-shield-check"/></svg></span>
-        <div>Phish<span>Guard</span></div>
+      <a class="logo" href="index.html">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div>Phish<span>Guard</span><em>AI</em></div>
       </a>
+
+      <!-- Synchronized Navigation Links / Tabs -->
       <nav class="nav-links" id="navLinks" aria-label="Main">
-        <a href="index.html">Live Monitor</a>
-        <a href="library.html" class="active" aria-current="page">Library</a>
-        <a href="history.html">History</a>
+        <a href="index.html"><span>Overview</span></a>
+        <a href="app.html"><span class="nav-live-dot"></span><span>Live Monitor</span></a>
+        <a href="library.html" class="active" aria-current="page">
+          <svg class="nav-ic" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Threat Library</span>
+        </a>
+        <a href="history.html">
+          <svg class="nav-ic" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><path d="M6 20V14"/><path d="M12 20V4"/></svg>
+          <span>History</span>
+        </a>
+        <a href="index.html#features"><span>Features</span></a>
+        <a href="index.html#how"><span>Architecture</span></a>
       </nav>
-      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
-        <svg class="ic"><use href="#i-menu"/></svg>
+
+      <!-- Right Status Pill matching index.html -->
+      <div class="nav-status-pill">
+        <span class="nav-live-dot" style="width:8px;height:8px;background:#2a7c6f;box-shadow:0 0 8px #2a7c6f"></span>
+        <span style="color:var(--accent);letter-spacing:0.04em">SHIELD ARMED</span>
+        <span class="nav-status-sep">|</span>
+        <span style="color:var(--muted)">&lt;180ms ASR</span>
+      </div>
+
+      <!-- Hamburger toggle for mobile -->
+      <button class="nav-hamburger" id="navToggle" aria-label="Expand navigation" aria-expanded="false" aria-controls="navLinks">
+        <svg viewBox="0 0 24 24"><line x1="4" x2="20" y1="7" y2="7"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="17" y2="17"/></svg>
       </button>
     </div>
-  </header>
 
-  <div class="bg-glow" aria-hidden="true"></div>
+    <!-- Mobile menu dropdown -->
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="index.html"><span>Overview (Home)</span></a>
+      <a href="app.html"><span class="nav-live-dot"></span><span>Live Call Monitor</span></a>
+      <a href="library.html" class="active"><span>Threat Playbook Library</span></a>
+      <a href="history.html"><span>Call Incident History</span></a>
+      <a href="index.html#features"><span>Features &amp; Detections</span></a>
+      <a href="index.html#how"><span>Architecture</span></a>
+    </div>
+  </header>
 
   <main class="wrap">
     <section class="hero">
@@ -204,7 +407,12 @@
     <!-- ---------- PLAYBOOK ---------- -->
     <section id="tab-playbook" class="panel" role="tabpanel">
       <div class="toolbar">
-        <input id="search" class="search" type="search" placeholder="Search scams, phrases or red flags…" aria-label="Search scams" />
+        <form id="librarySearchForm" class="library-search-form" role="search">
+          <label class="sr-only" for="search">Search scams, keywords, or red flags</label>
+          <input id="search" name="q" class="search" type="search" placeholder="Search scams, keywords, or red flags..." />
+          <button class="library-search-submit" type="submit">Search</button>
+          <span id="searchSaveStatus" class="sr-only" role="status"></span>
+        </form>
         <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
       </div>
       <div class="grid" id="playbookGrid"></div>
@@ -250,8 +458,10 @@
     </section>
   </main>
 
-  <footer class="foot">PhishGuard · Learn it, spot it, report it. Never share OTPs, PINs or passwords.</footer>
+  <footer class="foot">PhishGuard · Searches are stored on this device only. Never share OTPs, PINs or passwords.</footer>
 
+  <script src="js/searchHistory.js"></script>
+  <script src="js/ambientBackground.js"></script>
   <script>
   (function () {
     "use strict";
@@ -266,9 +476,28 @@
 
     /* ---------- Navigation (mobile toggle) ---------- */
     const navLinks = $("navLinks"), navToggle = $("navToggle");
+    const mobileNav = window.matchMedia("(max-width: 720px)");
+    function syncNavigation() {
+      isMobileNav = mobileNav.matches;
+      navLinks.classList.remove("open", "closed");
+      const expanded = !mobileNav.matches;
+      if (!expanded) navLinks.classList.add("closed");
+      navToggle.setAttribute("aria-expanded", String(expanded));
+      navToggle.setAttribute("aria-label", expanded ? "Collapse navigation" : "Expand navigation");
+    }
+    let isMobileNav = mobileNav.matches;
+    syncNavigation();
+    mobileNav.addEventListener("change", syncNavigation);
+    window.addEventListener("resize", () => {
+      if (mobileNav.matches !== isMobileNav) syncNavigation();
+    });
     navToggle.addEventListener("click", () => {
-      const open = navLinks.classList.toggle("open");
+      const open = mobileNav.matches
+        ? navLinks.classList.toggle("open")
+        : !navLinks.classList.toggle("closed");
+      isMobileNav = mobileNav.matches;
       navToggle.setAttribute("aria-expanded", String(open));
+      navToggle.setAttribute("aria-label", open ? "Collapse navigation" : "Expand navigation");
     });
 
     /* ---------- Tabs ---------- */
@@ -290,42 +519,48 @@
     const PLAYBOOK = [
       {
         name: "Bank Fraud", cat: "Bank", icon: "i-bank", level: "high",
-        summary: "The caller poses as your bank's KYC, fraud or security team to steal your OTP or card details.",
+        summary: "The caller impersonates a bank's KYC, fraud, or security team and claims an account problem needs immediate attention. They may ask for a one-time password, PIN, CVV, or a payment to supposedly secure or restore the account.",
+        mechanism: "The caller creates urgency around a supposed account lock or suspicious transaction, then asks for a secret code or card detail that could authorize access or a payment.",
         lines: ["Your account will be frozen in 30 minutes unless you verify now.", "Read me the OTP we just sent to your phone."],
         flags: ["Unsolicited call about your account", "Asks for OTP, PIN or CVV", "Deadline pressure"],
         dos: ["Hang up and call the number printed on your card.", "Never share an OTP, PIN or CVV with anyone."],
       },
       {
         name: "Urgent Utility Bill", cat: "Utilities", icon: "i-bolt", level: "high",
-        summary: "A fake electricity, gas, water or telecom provider threatens disconnection tonight and sends a payment link.",
+        summary: "The caller pretends to represent an electricity, gas, water, or telecom provider and threatens service disconnection over an alleged overdue bill. They pressure you to pay immediately, often through a link or payment method outside the provider's official channels.",
+        mechanism: "A short deadline discourages you from checking your account. A link or unfamiliar payment route may collect financial details or send money to the caller.",
         lines: ["Your power will be disconnected tonight due to an unpaid bill.", "Pay through this link within 30 minutes to avoid it."],
         flags: ["Threat of immediate disconnection", "Pushes you to a payment link", "Requests payment outside official apps"],
         dos: ["Check your bill in the provider's official app or website.", "Do not click links in unexpected messages."],
       },
       {
         name: "Tech Support Impersonation", cat: "Tech", icon: "i-monitor", level: "high",
-        summary: "The caller claims your computer has a virus and asks you to install remote-access software.",
+        summary: "An unsolicited caller claims to be technical support and says your computer has a virus, suspicious activity, or an urgent fault. They may ask you to install remote-access software or share a code, which can give a stranger control of your device and access to personal information.",
+        mechanism: "By keeping you on the phone while you install remote-control tools or disclose a one-time access code, the caller can guide actions on your device and target personal or financial information.",
         lines: ["This is Microsoft support. We detected a virus on your PC.", "Install AnyDesk so I can take control and remove it."],
         flags: ["Unrequested virus warning", "Asks to install AnyDesk or TeamViewer", "Asks for remote control of your device"],
         dos: ["Never install remote-access software for a stranger.", "Restart your device and run your own antivirus."],
       },
       {
         name: "Government Agency Threat", cat: "Government", icon: "i-gov", level: "high",
-        summary: "A fake police, CBI, customs or court official threatens arrest or a 'digital arrest' to force payment.",
+        summary: "The caller impersonates police, a court, customs, or another government agency and invents a case, parcel, or legal violation. Threats of arrest, demands for secrecy, and instructions to stay on the call are used to frighten you into transferring money or revealing personal details.",
+        mechanism: "The caller uses authority, fear, and isolation to prevent independent verification. They may request money, identity details, or continued compliance with instructions during the call.",
         lines: ["This is the cyber crime cell. A parcel in your name contains illegal items.", "Stay on the line. Do not tell your family, or a warrant will be issued today."],
         flags: ["Threatens arrest or legal action", "Demands secrecy", "Forces you to stay on the line"],
         dos: ["Hang up. Government agencies do not arrest people over the phone.", "Report at cybercrime.gov.in or call 1930."],
       },
       {
         name: "Fake Courier & Customs", cat: "Money", icon: "i-file", level: "medium",
-        summary: "A scammer claims a parcel is held at customs and asks for a small 'clearance fee' by UPI or card.",
+        summary: "A caller claims a parcel addressed to you is held at customs or has a delivery problem, then requests a small clearance or redelivery fee. The unexpected payment link may collect card or account details, or lead to further demands for money.",
+        mechanism: "An unexpected delivery story and a seemingly small fee make a payment request feel routine. The link may capture payment information or begin a sequence of additional demands.",
         lines: ["Your parcel is held at customs. A clearance fee of 499 rupees is due.", "Pay now using the link I am sending to your number."],
         flags: ["Unexpected parcel or fee", "Small amount to lower suspicion", "Payment link sent over SMS or WhatsApp"],
         dos: ["Track parcels only on the courier's official site.", "Never pay customs fees to a caller."],
       },
       {
         name: "UPI Refund & Prize Scam", cat: "Money", icon: "i-bank", level: "medium",
-        summary: "The caller says you're owed a refund or prize, but you must 'receive' money by approving a payment request.",
+        summary: "The caller promises a refund, prize, or other incoming payment but says you must approve a request or enter your UPI PIN to receive it. A PIN authorizes a payment; it is not required to accept money, and unexpected prize claims should be verified independently.",
+        mechanism: "A payment-collection request can be presented as a way to receive money. Entering a payment PIN or approving the request may authorize money to leave your account instead.",
         lines: ["You are eligible for a 5,000 rupee refund. I just need to send it to you.", "Open your UPI app and enter your PIN to accept the refund."],
         flags: ["Refund that needs a PIN to receive", "Unsolicited prize or refund", "Pressure to act quickly"],
         dos: ["Money is never received by entering a UPI PIN.", "Block and report the number in your payment app."],
@@ -335,18 +570,22 @@
     const CATS = ["All", "Bank", "Utilities", "Tech", "Government", "Money"];
     let activeCat = "All";
 
+    function normalizeSearch(value) {
+      return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    }
+
     function renderChips() {
       $("chips").innerHTML = CATS.map((c) =>
         `<button class="chip ${c === activeCat ? "active" : ""}" data-cat="${c}">${c}</button>`).join("");
     }
 
     function renderPlaybook() {
-      const q = $("search").value.trim().toLowerCase();
+      const terms = normalizeSearch($("search").value).split(/\s+/).filter(Boolean);
       const items = PLAYBOOK.filter((s) => {
         if (activeCat !== "All" && s.cat !== activeCat) return false;
-        if (!q) return true;
-        const hay = [s.name, s.summary, ...s.lines, ...s.flags].join(" ").toLowerCase();
-        return hay.includes(q);
+        if (!terms.length) return true;
+        const hay = normalizeSearch([s.name, s.summary, s.mechanism, ...s.lines, ...s.flags].join(" "));
+        return terms.every((term) => hay.includes(term));
       });
       $("noResults").hidden = items.length > 0;
       $("playbookGrid").innerHTML = items.map((s, i) => `
@@ -358,8 +597,10 @@
           <h3>${esc(s.name)}</h3>
           <p class="sc-sum">${esc(s.summary)}</p>
           <details>
-            <summary>How it works &amp; what to do</summary>
-            <h4>What the caller says</h4>
+            <summary><span>Scam details &amp; safety steps</span><svg class="ic expand-icon" aria-hidden="true"><use href="#i-chevron-down"/></svg></summary>
+            <h4>How the approach works</h4>
+            <p class="mechanism">${esc(s.mechanism)}</p>
+            <h4>Example phrases</h4>
             <ul class="quotes">${s.lines.map((l) => `<li>“${esc(l)}”</li>`).join("")}</ul>
             <h4>Red flags</h4>
             <ul class="flags">${s.flags.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>
@@ -369,6 +610,9 @@
         </article>`).join("");
     }
 
+    const initialSearch = new URLSearchParams(window.location.search).get("q");
+    if (initialSearch) $("search").value = initialSearch;
+
     $("chips").addEventListener("click", (e) => {
       const btn = e.target.closest(".chip");
       if (!btn) return;
@@ -377,6 +621,19 @@
       renderPlaybook();
     });
     $("search").addEventListener("input", renderPlaybook);
+    $("librarySearchForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const query = $("search").value.trim();
+      if (!query) return;
+      try {
+        window.PG.SearchHistory.add(query);
+        $("searchSaveStatus").textContent = "Search saved on this device.";
+      } catch (error) {
+        console.error("Unable to save the Library search.", error);
+        $("searchSaveStatus").textContent = "This search could not be saved to local history.";
+      }
+      renderPlaybook();
+    });
 
     /* =========================================================
        SCAM SIMULATOR
@@ -535,5 +792,15 @@
     startRun();
   })();
   </script>
+<script>
+    // Navbar scroll effect
+    const navbar = document.getElementById("appNavbar");
+    if (navbar) {
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 20) navbar.classList.add("scrolled");
+        else navbar.classList.remove("scrolled");
+      }, { passive: true });
+    }
+</script>
 </body>
 </html>

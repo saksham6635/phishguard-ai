@@ -19,7 +19,7 @@ PhishGuard is an automated, eyes-free security companion designed to protect vul
 
 | Component | Technology / Model | Description |
 | :--- | :--- | :--- |
-| **Frontend** | HTML5, Tailwind CSS, Vanilla JS | Dark-mode tactical cybersecurity UI with Framer-style transitions. |
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript | Responsive cybersecurity interface with accessible, reduced-motion-aware controls. |
 | **Backend** | FastAPI (Python 3.10+), Uvicorn | Asynchronous REST backend handling chunk ingestion and AI orchestration. |
 | **Speech-to-Text** | Groq Whisper (`whisper-large-v3`) | Ultra-fast speech recognition API for low-latency chunk processing. |
 | **Scam Classifier** | OpenAI gpt-oss (`gpt-oss-120b`) | High-reasoning LLM with strict JSON schema outputs for threat scoring. |

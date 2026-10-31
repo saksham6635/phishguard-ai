@@ -407,6 +407,15 @@ function saveToHistory(s) {
     ui.setMode(e.target.checked);
   });
 
+  $("landingSearch").form.addEventListener("submit", () => {
+    try {
+      window.PG.SearchHistory.add($("landingSearch").value);
+    } catch (error) {
+      console.error("Unable to save the Library search.", error);
+      ui.toast("This search could not be saved to local history.", "warn");
+    }
+  });
+
   // Keyboard shortcut: Space toggles monitoring (when not typing in a control)
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space" && e.target === document.body) { e.preventDefault(); $("btnMonitor").click(); }
@@ -423,6 +432,30 @@ function saveToHistory(s) {
   }
 })();
 
-document.getElementById("navToggle")?.addEventListener("click", () => {
-  document.getElementById("navLinks").classList.toggle("open");
+const navToggle = document.getElementById("navToggle");
+const navLinks = document.getElementById("navLinks");
+const mobileNav = window.matchMedia("(max-width: 720px)");
+let isMobileNav = mobileNav.matches;
+
+function syncNavigation() {
+  isMobileNav = mobileNav.matches;
+  navLinks.classList.remove("open", "closed");
+  const expanded = !mobileNav.matches;
+  if (!expanded) navLinks.classList.add("closed");
+  navToggle.setAttribute("aria-expanded", String(expanded));
+  navToggle.setAttribute("aria-label", expanded ? "Collapse navigation" : "Expand navigation");
+}
+
+syncNavigation();
+mobileNav.addEventListener("change", syncNavigation);
+window.addEventListener("resize", () => {
+  if (mobileNav.matches !== isMobileNav) syncNavigation();
+});
+navToggle.addEventListener("click", () => {
+  const expanded = mobileNav.matches
+    ? navLinks.classList.toggle("open")
+    : !navLinks.classList.toggle("closed");
+  isMobileNav = mobileNav.matches;
+  navToggle.setAttribute("aria-expanded", String(expanded));
+  navToggle.setAttribute("aria-label", expanded ? "Collapse navigation" : "Expand navigation");
 });

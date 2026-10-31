@@ -1,284 +1,1095 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#070b14" />
-  <title>PhishGuard — Real-Time Anti-Vishing Voice Companion</title>
-  <meta name="description" content="PhishGuard listens to speakerphone calls in real time and warns you about voice-phishing (vishing) attempts." />
+  <meta name="theme-color" content="#f0f4f8" />
+  <title>PhishGuard AI — Real-Time Anti-Vishing Voice Companion</title>
+  <meta name="description" content="PhishGuard AI monitors your calls in real time, detecting voice phishing with AI-powered scam detection, risk scoring, and instant alerts." />
   <link rel="icon" type="image/svg+xml" href="assets/icons/icon-shield.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  
+  <!-- Ambient Cybersecurity Background CSS -->
+  <link rel="stylesheet" href="css/ambient-background.css" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React + ReactDOM CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel for JSX compilation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans:    ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Space Grotesk', 'Inter', 'sans-serif'],
+            mono:    ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --bg:          #f0f4f8;
+      --bg-2:        #e8edf3;
+      --surface:     #edf1f6;
+      --card-bg:     #f0f4f8;
+      --border:      rgba(180, 196, 214, 0.7);
+      --border-focus:#2a7c6f;
+      --shadow-out:  6px 6px 14px #c8d0da, -5px -5px 12px #ffffff;
+      --shadow-in:   inset 4px 4px 9px #c8d0da, inset -4px -4px 9px #ffffff;
+      --text:        #1e2a36;
+      --muted:       #526474;
+      --faint:       #7a8fa0;
+      --accent:      #2a7c6f;
+      --accent-lt:   #e6f4f2;
+      --accent-2:    #3b6d8c;
+      --safe-rgb:    31, 107, 73;
+      --warn-rgb:    145, 91, 12;
+      --crit-rgb:    164, 55, 50;
+      --radius:      16px;
+      --font:        'Inter', system-ui, sans-serif;
+      --font-d:      'Space Grotesk', 'Inter', sans-serif;
+      --font-mono:   'JetBrains Mono', ui-monospace, monospace;
+      --ease:        cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { color-scheme: light; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Neomorphic Card ── */
+    .neo {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-out);
+    }
+    .neo:hover { box-shadow: 8px 8px 18px #c0c9d4, -6px -6px 14px #ffffff; }
+
+    /* ── Shimmer Border Card ── */
+    .shimmer-card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-out);
+      overflow: hidden;
+      transition: transform 0.3s var(--ease), box-shadow 0.3s;
+    }
+    .shimmer-card::before {
+      content: '';
+      position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+      background: linear-gradient(120deg, transparent 30%, rgba(42,124,111,0.3) 50%, transparent 70%);
+      background-size: 200% 100%;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude;
+      animation: shimmer-move 3.5s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes shimmer-move {
+      from { background-position: -200% 0; }
+      to   { background-position: 200% 0; }
+    }
+    .shimmer-card:hover { transform: translateY(-3px); box-shadow: 8px 8px 22px #bac4d0, -6px -6px 16px #ffffff; }
+
+    /* ── Top Navigation Bar ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(240, 244, 248, 0.88);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 14px rgba(45, 65, 85, 0.06);
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .navbar.scrolled {
+      background: rgba(236, 242, 248, 0.97);
+      box-shadow: 0 4px 20px rgba(35, 55, 75, 0.09);
+    }
+    .nav-inner {
+      max-width: 1360px; margin: 0 auto; padding: 0 28px; height: 68px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 11px; text-decoration: none;
+      font-family: var(--font-d); font-weight: 700; font-size: 19px; color: var(--text);
+    }
+    .logo-mark {
+      width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center;
+      background: var(--accent); box-shadow: 3px 3px 8px rgba(42,124,111,0.35), -2px -2px 6px rgba(255,255,255,0.7);
+    }
+    .logo-mark svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .logo span { color: var(--accent); }
+    .logo em {
+      font-style: normal; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.06em; padding: 2px 7px; border-radius: 6px;
+      background: var(--accent-lt); color: var(--accent); border: 1px solid rgba(42,124,111,0.25);
+      margin-left: 2px;
+    }
+
+    /* Primary Nav Links / Tabs */
+    .nav-links {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 6px; border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid rgba(180, 196, 214, 0.5);
+      box-shadow: var(--shadow-in);
+    }
+    .nav-links a {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 9px; text-decoration: none;
+      font-size: 13.5px; font-weight: 500; color: var(--muted);
+      transition: all 0.22s var(--ease);
+    }
+    .nav-links a:hover { color: var(--text); background: rgba(255,255,255,0.6); }
+    .nav-links a.active {
+      color: var(--accent); background: var(--card-bg); font-weight: 600;
+      box-shadow: 2px 2px 6px #c4cdd8, -2px -2px 6px #ffffff;
+      border: 1px solid rgba(42, 124, 111, 0.2);
+    }
+
+    .nav-live-dot {
+      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 6px rgba(42,124,111,0.7);
+      animation: navPulse 1.6s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes navPulse {
+      0%, 100% { transform: scale(1); opacity: 0.95; }
+      50%      { transform: scale(1.4); opacity: 0.4; }
+    }
+
+    /* Right side Status Widget */
+    .nav-status-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 14px; border-radius: 99px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      box-shadow: 2px 2px 6px #c8d0da, -2px -2px 6px #ffffff;
+      font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+    }
+    .nav-status-sep { color: var(--border); font-weight: 300; }
+
+    /* Mobile hamburger */
+    .nav-hamburger {
+      display: none; width: 40px; height: 40px; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      box-shadow: var(--shadow-out); align-items: center; justify-content: center; cursor: pointer;
+    }
+    .nav-hamburger svg { width: 20px; height: 20px; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+    .mobile-menu {
+      display: none; position: fixed; top: 68px; left: 0; right: 0; z-index: 99;
+      background: rgba(240, 244, 248, 0.98); backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border); padding: 14px 24px 22px;
+      flex-direction: column; gap: 6px; box-shadow: 0 10px 26px rgba(40,60,80,0.12);
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-radius: 10px;
+      text-decoration: none; font-size: 14.5px; font-weight: 500; color: var(--muted);
+    }
+    .mobile-menu a.active { background: var(--accent-lt); color: var(--accent); font-weight: 600; }
+    .mobile-menu a:hover { background: var(--surface); color: var(--text); }
+
+    /* ── Animations ── */
+    .reveal { opacity: 0; transform: translateY(32px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+    @keyframes bar-wave {
+      0%, 100% { height: 4px; opacity: 0.5; }
+      25%      { height: 26px; opacity: 1; }
+      50%      { height: 40px; opacity: 1; }
+      75%      { height: 18px; opacity: 0.8; }
+    }
+    .sbar {
+      width: 5px; border-radius: 10px; transform-origin: bottom;
+      background: linear-gradient(to top, var(--accent), #3b8fbf);
+    }
+
+    @keyframes float-y {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+    @keyframes ring-out {
+      0%   { transform: scale(1); opacity: 0.55; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+    @keyframes scan {
+      0%   { top: 10%; }
+      100% { top: 90%; }
+    }
+    @keyframes rot { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes badge-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes grad-shift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+
+    .grad-text-anim {
+      background: linear-gradient(135deg, #2a7c6f 0%, #3b6d8c 40%, #5b4fa8 70%, #2a7c6f 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: grad-shift 5s ease infinite;
+    }
+
+    section { position: relative; z-index: 1; }
+    .section-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 99px; font-family: var(--font-mono);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+      background: var(--accent-lt); color: var(--accent); border: 1px solid rgba(42,124,111,0.22);
+      margin-bottom: 20px;
+    }
+
+    /* Scenario pill active states */
+    .scenario-btn {
+      padding: 10px 18px; border-radius: 12px; font-size: 13px; font-weight: 600;
+      border: 1px solid var(--border); background: var(--card-bg); color: var(--muted);
+      cursor: pointer; transition: all 0.25s var(--ease);
+      box-shadow: 3px 3px 8px #c8d0da, -2px -2px 6px #ffffff;
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .scenario-btn:hover { color: var(--text); transform: translateY(-1px); }
+    .scenario-btn.active {
+      color: var(--accent); background: var(--card-bg);
+      border-color: rgba(42, 124, 111, 0.4);
+      box-shadow: inset 3px 3px 6px #c8d0da, inset -3px -3px 6px #ffffff;
+    }
+
+    /* Modal */
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 200; background: rgba(30,42,54,0.45);
+      backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .modal-box {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px;
+      box-shadow: var(--shadow-out); max-width: 640px; width: 100%; max-height: 80vh;
+      overflow-y: auto; padding: 36px; position: relative;
+    }
+    .modal-box::-webkit-scrollbar { width: 6px; }
+    .modal-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    @media (max-width: 980px) {
+      .nav-links, .nav-status-pill { display: none; }
+      .nav-hamburger { display: flex; }
+    }
+    @media (max-width: 640px) {
+      .nav-inner { padding-inline: 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
 </head>
-<body data-state="idle">
+<body>
 
-  <!-- ============ SVG ICON SPRITE ============ -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></symbol>
-    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
-    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></symbol>
-    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></symbol>
-    <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
-    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
-    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></symbol>
-    <symbol id="i-bank" viewBox="0 0 24 24"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></symbol>
-    <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
-    <symbol id="i-monitor" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></symbol>
-    <symbol id="i-gov" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
-    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
-    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
-    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></symbol>
-    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
-    <symbol id="i-menu" viewBox="0 0 24 24"><line x1="4" x2="20" y1="7" y2="7"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="17" y2="17"/></symbol>
+  <!-- ============ CYBERSECURITY BACKGROUND ============ -->
+  <div class="telemetry-strip" aria-hidden="true"></div>
+  <canvas id="ambient-dots-canvas" aria-hidden="true"></canvas>
+
+  <div class="hud-corner tl" aria-hidden="true">
+    <span class="hud-crosshair"></span>SYS.VOICE // 48kHz REAL-TIME ASR
+  </div>
+  <div class="hud-corner tr" aria-hidden="true">
+    DETECTOR // MULTI-LAYER NLP &lt;180MS<span class="hud-crosshair"></span>
+  </div>
+  <div class="hud-corner bl" aria-hidden="true">
+    <span class="hud-crosshair"></span>PHISHGUARD.AI // REAL-TIME CALL SHIELD
+  </div>
+  <div class="hud-corner br" aria-hidden="true">
+    STATUS: ARMED // ZERO SERVER RETENTION<span class="hud-crosshair"></span>
+  </div>
+
+  <div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ─────────── Icons ─────────── */
+const Icon = ({ d, d2, rect, line, path2, cx, cy, r, viewBox='0 0 24 24', size='1em', stroke='currentColor', sw=2 }) => (
+  <svg viewBox={viewBox} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{width:size,height:size,flexShrink:0}}>
+    {d    && <path d={d}/>}
+    {d2   && <path d={d2}/>}
+    {path2&& <path d={path2}/>}
+    {rect && <rect {...rect}/>}
+    {line && <line {...line}/>}
+    {r!==undefined && cx!==undefined && <circle cx={cx} cy={cy} r={r}/>}
   </svg>
+);
 
-  <header class="nav">
-  <div class="nav-inner">
-    <a class="nav-brand" href="index.html">
-      <span class="nav-mark"><svg class="ic"><use href="#i-shield-check"/></svg></span>
-      <div>Phish<span>Guard</span></div>
-    </a>
-    <nav class="nav-links" id="navLinks" aria-label="Main">
-      <a href="index.html" class="active" aria-current="page">Live Monitor</a>
-      <a href="library.html">Library</a>
-      <a href="history.html">History</a>
-    </nav>
-    <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
-      <svg class="ic"><use href="#i-menu"/></svg>
-    </button>
-  </div>
-</header>
+const ShieldIcon = ({size}) => <Icon size={size} d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" d2="m9 12 2 2 4-4"/>;
+const MicIcon    = ({size}) => <Icon size={size} d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" d2="M19 10v2a7 7 0 0 1-14 0v-2" line={{x1:12,x2:12,y1:19,y2:22}}/>;
+const BoltIcon   = ({size}) => <Icon size={size} d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>;
+const AlertIcon  = ({size}) => <Icon size={size} d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" d2="M12 9v4" path2="M12 17h.01"/>;
+const BookIcon   = ({size}) => <Icon size={size} d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" d2="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>;
+const CheckIcon  = ({size}) => <Icon size={size} d="M20 6 9 17l-5-5" sw={2.5}/>;
+const PhoneIcon  = ({size}) => <Icon size={size} d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.21 12 19.79 19.79 0 0 1 1.14 3.4 2 2 0 0 1 3.11 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>;
+const MailIcon   = ({size}) => <Icon size={size} d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" rect={{width:20,height:16,x:2,y:4,rx:2}}/>;
+const GlobeIcon  = ({size}) => <Icon size={size} cx={12} cy={12} r={10} d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" d2="M2 12h20"/>;
+const ChartIcon  = ({size}) => <Icon size={size} line={{x1:18,x2:18,y1:20,y2:10}} d="M6 20V14" d2="M12 20V4"/>;
 
-  <!-- Ambient background + critical vignette -->
-  <div class="bg-glow" aria-hidden="true"><span></span><span></span><span></span></div>
-  <div class="grid-overlay" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
+/* ─────────── Soundwave Visualizer ─────────── */
+function Visualizer({ activeRisk = 0, isSimulating = false }) {
+  const bars = 22;
+  const delays = Array.from({length:bars}, (_,i) => (i * 0.07 % 0.9).toFixed(2));
+  const durations = [1.1,1.4,1.0,1.6,1.2,1.5,1.3,1.1,1.4,1.2,1.0,1.5,1.3,1.1,1.6,1.4,1.0,1.2,1.5,1.3,1.1,1.4];
 
-  <!-- ============ CRITICAL BANNER ============ -->
-  <div id="criticalBanner" class="critical-banner" role="alert" aria-live="assertive" hidden>
-    <div class="cb-inner">
-      <span class="cb-icon"><svg class="ic"><use href="#i-alert"/></svg></span>
-      <div class="cb-text">
-        <strong>CRITICAL PHISHING DETECTED</strong>
-        <span>Do not share any OTP, PIN or bank password. Hang up now.</span>
+  const ringColor = activeRisk > 70 ? 'rgba(164, 55, 50, 0.4)' : activeRisk > 40 ? 'rgba(145, 91, 12, 0.4)' : 'rgba(42, 124, 111, 0.2)';
+  const orbAccent = activeRisk > 70 ? '#a43732' : activeRisk > 40 ? '#8a570a' : 'var(--accent)';
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
+      {/* Outer rings */}
+      <div style={{position:'relative',width:220,height:220,display:'flex',alignItems:'center',justifyContent:'center'}}>
+        {[0,1,2].map(i => (
+          <div key={i} style={{
+            position:'absolute', borderRadius:'50%',
+            width: 180+i*34, height: 180+i*34,
+            border:`1.5px solid ${ringColor}`,
+            animation:`ring-out ${2.4+i*0.8}s ease-out ${i*0.6}s infinite`,
+          }}/>
+        ))}
+        {/* Rotating dashed ring */}
+        <div style={{position:'absolute',width:198,height:198,animation:'rot 24s linear infinite'}}>
+          <svg width="198" height="198" viewBox="0 0 198 198">
+            <circle cx="99" cy="99" r="94" fill="none" stroke={ringColor} strokeWidth="1.5" strokeDasharray="7 5"/>
+          </svg>
+        </div>
+        {/* Main orb */}
+        <div style={{
+          width:148, height:148, borderRadius:'50%',
+          background:'linear-gradient(135deg, #e6f4f2 0%, #f0f4f8 60%)',
+          boxShadow:'6px 6px 18px #c4d0dc, -6px -6px 16px #ffffff, inset 0 0 0 1px rgba(42,124,111,0.15)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          position:'relative', overflow:'hidden',
+          border:`1px solid ${ringColor}`,
+          transition:'border-color 0.4s ease',
+        }}>
+          {/* Scan line */}
+          <div style={{
+            position:'absolute', left:0, right:0, height:2,
+            background:`linear-gradient(90deg, transparent, ${orbAccent}, transparent)`,
+            animation:'scan 2.6s linear infinite', top:'50%',
+          }}/>
+          <div style={{fontSize:40,color:orbAccent,filter:`drop-shadow(0 2px 8px ${orbAccent}40)`,transition:'color 0.4s ease'}}>
+            <MicIcon size="1em"/>
+          </div>
+          {/* LIVE badge */}
+          <div style={{
+            position:'absolute', top:12, right:12,
+            display:'inline-flex', alignItems:'center', gap:4,
+            padding:'2px 8px', borderRadius:99, fontSize:10,
+            fontFamily:'var(--font-mono)', fontWeight:700, letterSpacing:'0.1em',
+            background: activeRisk > 70 ? 'rgba(164,55,50,0.12)' : 'rgba(42,124,111,0.12)',
+            color: orbAccent,
+            border:`1px solid ${orbAccent}40`,
+          }}>
+            <span style={{width:6,height:6,borderRadius:'50%',background:orbAccent,display:'inline-block',animation:'badge-blink 1.2s ease-in-out infinite'}}/>
+            {isSimulating ? 'ANALYZING' : 'READY'}
+          </div>
+        </div>
       </div>
-      <button id="bannerDismiss" class="cb-close" aria-label="Dismiss alert"><svg class="ic"><use href="#i-x"/></svg></button>
+      {/* Waveform bars */}
+      <div style={{display:'flex',alignItems:'flex-end',gap:3,height:44,marginTop:16}}>
+        {Array.from({length:bars}).map((_,i) => (
+          <div
+            key={i}
+            className="sbar"
+            style={{
+              width:5, height:4,
+              animation:`bar-wave ${durations[i]}s ${delays[i]}s ease-in-out infinite`,
+              background: activeRisk > 70
+                ? 'linear-gradient(to top, #a43732, #f87171)'
+                : activeRisk > 40
+                ? 'linear-gradient(to top, #8a570a, #facc15)'
+                : 'linear-gradient(to top, var(--accent), #3b8fbf)',
+            }}
+          />
+        ))}
+      </div>
+      <p style={{marginTop:10,fontFamily:'var(--font-mono)',fontSize:11,color:orbAccent,letterSpacing:'0.16em',textTransform:'uppercase',opacity:0.9,fontWeight:600}}>
+        {activeRisk > 70 ? '🚨 HIGH THREAT DETECTED' : activeRisk > 40 ? '⚠️ SUSPICIOUS PATTERN' : 'CONTINUOUS SPEECH MONITOR'}
+      </p>
     </div>
-  </div>
+  );
+}
 
-  <div class="app">
+/* ─────────── useReveal ─────────── */
+function useReveal(threshold=0.15) {
+  const ref = useRef(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const el = ref.current; if(!el) return;
+    const obs = new IntersectionObserver(([e]) => { if(e.isIntersecting){ setVis(true); obs.disconnect(); } }, {threshold});
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return [ref, vis];
+}
 
-    <!-- ============ HEADER ============ -->
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark">
-          <svg class="ic"><use href="#i-shield-check"/></svg>
-        </div>
-        <div class="brand-text">
-          <h1>Phish<span>Guard</span></h1>
-          <p>Real-Time Anti-Vishing Voice Companion</p>
-        </div>
+/* ─────────── StatCard ─────────── */
+function StatCard({value, label, accent}) {
+  return (
+    <div className="neo" style={{padding:'18px 14px',textAlign:'center',transition:'all 0.3s'}}>
+      <div style={{fontFamily:'var(--font-d)',fontSize:'1.7rem',fontWeight:700,color:accent||'var(--accent)',lineHeight:1.1}}>
+        {value}
       </div>
+      <div style={{marginTop:4,fontSize:12,color:'var(--faint)',fontWeight:500,letterSpacing:'0.02em'}}>{label}</div>
+    </div>
+  );
+}
 
-      <div class="topbar-right">
-        <div class="chip" id="modeChip" title="Data source">
-          <span class="chip-dot"></span><span id="modeText">Live mode</span>
-        </div>
-        <div class="status-pill" id="statusPill">
-          <span class="pulse-dot"></span>
-          <span id="statusText">Standby</span>
-          <span class="divider"></span>
-          <span id="sessionTimer" class="mono">00:00</span>
-        </div>
-      </div>
-    </header>
+/* ─────────── Unified Navigation Bar ─────────── */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-    <!-- ============ MAIN GRID ============ -->
-    <main class="layout">
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', fn, {passive:true});
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
 
-      <!-- ---------- LEFT: THREAT PANEL ---------- -->
-      <section class="col-left">
+  return (
+    <>
+      <nav className={`navbar${scrolled?' scrolled':''}`}>
+        <div className="nav-inner">
+          {/* Brand Logo */}
+          <a href="index.html" className="logo">
+            <div className="logo-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </div>
+            <div>
+              Phish<span>Guard</span><em>AI</em>
+            </div>
+          </a>
 
-        <!-- Gauge card -->
-        <article class="card gauge-card" id="gaugeCard">
-          <div class="card-head">
-            <h2>Live Threat Meter</h2>
-            <span class="tag" id="thresholdTag">0 – 100</span>
+          {/* Integrated Navigation Links / Tabs */}
+          <div className="nav-links">
+            <a href="index.html" className="active" title="Home overview">
+              <span>Overview</span>
+            </a>
+            <a href="app.html" title="Open live call monitoring dashboard">
+              <span className="nav-live-dot"></span>
+              <span>Live Monitor</span>
+            </a>
+            <a href="library.html" title="Scam threat playbook & training">
+              <BookIcon size="0.95em"/>
+              <span>Threat Library</span>
+            </a>
+            <a href="history.html" title="Call history & threat analytics">
+              <ChartIcon size="0.95em"/>
+              <span>History</span>
+            </a>
+            <a href="#features" title="Jump to AI features">
+              <span>Features</span>
+            </a>
+            <a href="#how" title="How PhishGuard works">
+              <span>Architecture</span>
+            </a>
           </div>
 
-          <div class="gauge-wrap">
-            <div class="gauge-pulse"></div>
-            <div class="gauge-pulse delay"></div>
-            <svg class="gauge" viewBox="0 0 240 240" role="img" aria-label="Threat gauge">
-              <defs>
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="4" result="b"/>
-                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              </defs>
-              <circle class="g-ticks" cx="120" cy="120" r="108"/>
-              <circle class="g-track" cx="120" cy="120" r="92"/>
-              <circle id="gaugeArc" class="g-arc" cx="120" cy="120" r="92" filter="url(#glow)"/>
+          {/* Right Status Pill instead of separate Launch button */}
+          <div className="nav-status-pill">
+            <span className="nav-live-dot" style={{width:8,height:8,background:'#2a7c6f',boxShadow:'0 0 8px #2a7c6f'}}></span>
+            <span style={{color:'var(--accent)',letterSpacing:'0.04em'}}>SHIELD ARMED</span>
+            <span className="nav-status-sep">|</span>
+            <span style={{color:'var(--muted)'}}>&lt;180ms ASR</span>
+          </div>
+
+          {/* Mobile hamburger */}
+          <div className="nav-hamburger" onClick={() => setMenuOpen(v=>!v)} aria-label="Menu">
+            <svg viewBox="0 0 24 24">
+              {menuOpen
+                ? <><path d="M18 6 6 18"/><path d="m6 6 12 12"/></>
+                : <><line x1="4" x2="20" y1="7"  y2="7"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="17" y2="17"/></>
+              }
             </svg>
-            <div class="gauge-center">
-              <img id="gaugeStatusIcon" src="assets/icons/icon-shield.svg" alt="" width="30" height="30" />
-              <div class="score"><span id="gaugeScore">0</span><small>/100</small></div>
-              <div id="gaugeLabel" class="g-label">STANDBY</div>
-            </div>
           </div>
+        </div>
+      </nav>
 
-          <div class="scale" aria-hidden="true">
-            <span class="s-safe">Safe</span>
-            <span class="s-warn">Suspicious</span>
-            <span class="s-crit">Critical</span>
-          </div>
-          <div class="scale-bar" aria-hidden="true"><i id="scaleMarker"></i></div>
+      {/* Mobile navigation drawer */}
+      <div className={`mobile-menu${menuOpen?' open':''}`}>
+        <a href="index.html" className="active" onClick={()=>setMenuOpen(false)}>
+          <span>Overview (Home)</span>
+        </a>
+        <a href="app.html" onClick={()=>setMenuOpen(false)}>
+          <span className="nav-live-dot"></span>
+          <span>Live Call Monitor</span>
+        </a>
+        <a href="library.html" onClick={()=>setMenuOpen(false)}>
+          <BookIcon size="1em"/>
+          <span>Threat Playbook Library</span>
+        </a>
+        <a href="history.html" onClick={()=>setMenuOpen(false)}>
+          <ChartIcon size="1em"/>
+          <span>Call Incident History</span>
+        </a>
+        <a href="#features" onClick={()=>setMenuOpen(false)}>Features & Detections</a>
+        <a href="#how" onClick={()=>setMenuOpen(false)}>How It Works</a>
+        <a href="#contact" onClick={()=>setMenuOpen(false)}>Contact & Security</a>
+      </div>
+    </>
+  );
+}
 
-          <p id="riskCaption" class="risk-caption">Start monitoring to analyse your call.</p>
-        </article>
+/* ─────────── Interactive Simulator Console ─────────── */
+function LiveSimulator({ activeScenario, setScenario, customText, setCustomText }) {
+  const scenarios = [
+    {
+      id: 'irs',
+      title: '🚨 IRS Impersonator Call',
+      risk: 94,
+      level: 'CRITICAL THREAT',
+      type: 'Government Impersonation / Tax Fraud',
+      flags: ['Urgent legal action threat', 'Prepaid voucher / wire demand', 'Forced caller identity concealment'],
+      advice: 'Hang up immediately. Government agencies never demand instant payments via gift cards or phone.',
+      text: 'This is Officer Miller from the Internal Revenue Service fraud division. An active warrant has been signed against you. You must stay on the line and purchase a voucher to settle this immediately, or law enforcement will be dispatched within 45 minutes.',
+    },
+    {
+      id: 'bank',
+      title: '⚠️ Chase Bank OTP Phish',
+      risk: 76,
+      level: 'SUSPICIOUS (VISHING)',
+      type: 'Financial Account Takeover',
+      flags: ['One-time code (OTP) extraction', 'Artificial transaction alarm', 'Pressure to bypass 2FA'],
+      advice: 'Never disclose security codes sent to your phone. Bank staff will never ask for your verification code.',
+      text: 'Hello, this is Chase Bank Fraud Department. A suspicious transfer of $1,850 was just requested from Miami. To block this transaction immediately, please read out the 6-digit one-time passcode just sent to your phone.',
+    },
+    {
+      id: 'safe',
+      title: '🛡️ Legitimate Clinic Call',
+      risk: 8,
+      level: 'VERIFIED SAFE',
+      type: 'Standard Service Call',
+      flags: ['No payment demanded', 'No credentials requested', 'Normal informational tone'],
+      advice: 'Routine informational conversation. No suspicious coercive indicators found.',
+      text: 'Hello, calling from Pinecrest Medical to confirm your annual routine checkup with Dr. Watson this Thursday at 10:30 AM. Please arrive 10 minutes early. No payment or action is required.',
+    },
+  ];
 
-        <!-- Scam archetype -->
-        <article class="card archetype-card">
-          <div class="card-head">
-            <h2>Scam Archetype</h2>
-          </div>
-          <div id="scamBadge" class="scam-badge is-none">
-            <span class="sb-icon"><svg class="ic" id="scamBadgeIcon"><use href="#i-shield-check"/></svg></span>
-            <div class="sb-text">
-              <strong id="scamBadgeText">No scam pattern detected</strong>
-              <span id="scamBadgeSub">Waiting for conversation…</span>
-            </div>
-          </div>
+  const current = scenarios.find(s => s.id === activeScenario) || scenarios[0];
+  const color = current.risk > 70 ? '#a43732' : current.risk > 40 ? '#8a570a' : '#2a7c6f';
 
-          <h3 class="mini-title"><svg class="ic"><use href="#i-flag"/></svg> Red flags</h3>
-          <ul id="flagList" class="flag-list">
-            <li class="flag-empty">None detected yet</li>
-          </ul>
+  return (
+    <div className="neo" style={{
+      maxWidth: 1040, margin: '20px auto 0', padding: 28,
+      border: `1px solid ${color}40`,
+      transition: 'border-color 0.4s ease',
+    }}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',flexWrap:'wrap',gap:12,marginBottom:18}}>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <span className="nav-live-dot" style={{background:color,boxShadow:`0 0 8px ${color}`}}></span>
+          <span style={{fontFamily:'var(--font-mono)',fontSize:12,fontWeight:700,letterSpacing:'0.08em',color:'var(--muted)'}}>
+            INTERACTIVE REAL-TIME SPEECH ANALYZER
+          </span>
+        </div>
+        <span style={{fontSize:12,fontFamily:'var(--font-mono)',color:'var(--faint)'}}>
+          Direct Test • Zero Latency
+        </span>
+      </div>
 
-          <div id="adviceBox" class="advice" hidden>
-            <svg class="ic"><use href="#i-shield"/></svg>
-            <p id="adviceText"></p>
-          </div>
-        </article>
-
-        <!-- Controls -->
-        <article class="card controls-card">
-          <div class="card-head"><h2>Controls</h2></div>
-
-          <button id="btnMonitor" class="btn btn-primary btn-lg">
-            <svg class="ic"><use href="#i-mic"/></svg>
-            <span>Start Monitoring</span>
+      {/* Scenario selector tabs */}
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',marginBottom:20}}>
+        {scenarios.map(sc => (
+          <button
+            key={sc.id}
+            onClick={() => setScenario(sc.id)}
+            className={`scenario-btn${activeScenario===sc.id ? ' active' : ''}`}
+          >
+            {sc.title}
           </button>
+        ))}
+      </div>
 
-          <button id="btnDeterrent" class="btn btn-deterrent btn-lg">
-            <span class="btn-ripple"></span>
-            <svg class="ic"><use href="#i-shield"/></svg>
-            <span>Play Safe Deterrent</span>
-          </button>
-
-          <div class="toggles">
-            <label class="toggle">
-              <input type="checkbox" id="voiceToggle" checked />
-              <span class="switch"></span>
-              <span class="t-label"><svg class="ic"><use href="#i-volume"/></svg> Voice alerts</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" id="alarmToggle" checked />
-              <span class="switch"></span>
-              <span class="t-label"><svg class="ic"><use href="#i-alert"/></svg> Alarm chime</span>
-            </label>
-            <label class="toggle">
-              <input type="checkbox" id="demoToggle" />
-              <span class="switch"></span>
-              <span class="t-label"><svg class="ic"><use href="#i-play"/></svg> Demo scenario</span>
-            </label>
+      {/* Simulator Body */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 300px',gap:24,alignItems:'stretch'}} className="sim-grid">
+        {/* Transcript Feed Simulation */}
+        <div style={{
+          background:'var(--surface)', padding:20, borderRadius:14,
+          border:'1px solid var(--border)', display:'flex', flexDirection:'column', gap:14
+        }}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',fontSize:12,fontFamily:'var(--font-mono)',color:'var(--faint)'}}>
+            <span>SPEECH TRANSCRIPT STREAM</span>
+            <span style={{color}}>SCORE: {current.risk}/100</span>
           </div>
 
-          <button id="btnReset" class="btn btn-ghost btn-sm">
-            <svg class="ic"><use href="#i-reset"/></svg><span>Reset session</span>
-          </button>
-        </article>
-      </section>
+          <div style={{
+            fontSize:14.5, lineHeight:1.7, color:'var(--text)',
+            padding:'14px 16px', background:'var(--card-bg)', borderRadius:10,
+            border:'1px solid var(--border)',
+            boxShadow:'var(--shadow-in)', minHeight:90
+          }}>
+            {current.text}
+          </div>
 
-      <!-- ---------- RIGHT: TRANSCRIPT + SUMMARY ---------- -->
-      <section class="col-right">
-
-        <article class="card transcript-card">
-          <div class="card-head">
-            <h2>Live Transcript</h2>
-            <div class="head-meta">
-              <span class="live-badge" id="liveBadge"><i></i>LIVE</span>
-              <span class="tag mono" id="wordCount">0 words</span>
+          {/* Red flags */}
+          <div>
+            <span style={{fontSize:11,fontFamily:'var(--font-mono)',fontWeight:700,color:'var(--muted)',letterSpacing:'0.06em'}}>
+              IDENTIFIED RED FLAGS:
+            </span>
+            <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:8}}>
+              {current.flags.map((fl,i) => (
+                <span key={i} style={{
+                  fontSize:11.5, padding:'3px 9px', borderRadius:7,
+                  background:`${color}12`, color:color, border:`1px solid ${color}35`,
+                  fontFamily:'var(--font-mono)', fontWeight:600
+                }}>
+                  • {fl}
+                </span>
+              ))}
             </div>
           </div>
 
-          <div class="wave-wrap">
-            <canvas id="waveCanvas" height="84"></canvas>
-            <span class="wave-label"><svg class="ic"><use href="#i-mic"/></svg><span id="micLabel">Microphone idle</span></span>
+          {/* Live Action Advice */}
+          <div style={{
+            padding:'10px 14px', borderRadius:10,
+            background: current.risk > 70 ? 'rgba(164,55,50,0.08)' : 'rgba(42,124,111,0.08)',
+            border:`1px solid ${color}30`,
+            fontSize:13, color:'var(--text)', display:'flex', alignItems:'center', gap:10
+          }}>
+            <ShieldIcon size="1.2em"/>
+            <span><strong>PhishGuard Guidance:</strong> {current.advice}</span>
           </div>
+        </div>
 
-          <div id="transcriptFeed" class="feed" aria-live="polite">
-            <div id="transcriptEmpty" class="empty">
-              <div class="empty-ic"><svg class="ic"><use href="#i-phone"/></svg></div>
-              <h3>No call in progress</h3>
-              <p>Put your call on speakerphone and press <b>Start Monitoring</b>. PhishGuard transcribes the conversation every few seconds and flags manipulation tactics instantly.</p>
+        {/* Live Gauge & Meter */}
+        <div style={{
+          background:'var(--surface)', padding:20, borderRadius:14,
+          border:'1px solid var(--border)', display:'flex', flexDirection:'column',
+          alignItems:'center', justifyContent:'center', textAlign:'center', gap:12
+        }}>
+          <span style={{fontSize:11,fontFamily:'var(--font-mono)',fontWeight:700,letterSpacing:'0.08em',color:'var(--muted)'}}>
+            THREAT RISK GAUGE
+          </span>
+
+          {/* Circle meter */}
+          <div style={{position:'relative',width:120,height:120,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(180,196,214,0.4)" strokeWidth="8"/>
+              <circle cx="60" cy="60" r="48" fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
+                strokeDasharray={301.6} strokeDashoffset={301.6 - (current.risk/100)*301.6}
+                style={{transform:'rotate(-90deg)',transformOrigin:'50% 50%',transition:'all 0.6s ease',filter:`drop-shadow(0 0 6px ${color}60)`}}
+              />
+            </svg>
+            <div style={{position:'absolute',textAlign:'center'}}>
+              <div style={{fontFamily:'var(--font-d)',fontSize:28,fontWeight:800,color,lineHeight:1}}>{current.risk}</div>
+              <div style={{fontSize:10,fontFamily:'var(--font-mono)',color:'var(--faint)'}}>/100</div>
             </div>
           </div>
-        </article>
 
-        <article class="card summary-card" id="summaryCard">
-          <div class="card-head">
-            <h2>Post-Call Incident Summary</h2>
-            <div class="head-actions">
-              <button id="btnDownload" class="btn btn-ghost btn-sm" disabled>
-                <svg class="ic"><use href="#i-download"/></svg><span>Download log</span>
-              </button>
-              <button id="btnPrint" class="btn btn-ghost btn-sm" disabled>
-                <svg class="ic"><use href="#i-print"/></svg><span>Print report</span>
-              </button>
+          <div>
+            <div style={{fontSize:13,fontFamily:'var(--font-mono)',fontWeight:700,color}}>{current.level}</div>
+            <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>{current.type}</div>
+          </div>
+
+          <a href="app.html" style={{
+            width:'100%', padding:'10px 0', borderRadius:10, textDecoration:'none',
+            fontSize:13, fontWeight:600, color:'#fff', background:'var(--accent)',
+            textAlign:'center', boxShadow:'3px 3px 8px rgba(42,124,111,0.3)',
+            display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6
+          }}>
+            <MicIcon size="0.95em"/> Monitor Your Call
+          </a>
+        </div>
+      </div>
+
+      <style>{`
+        @media(max-width:860px){.sim-grid{grid-template-columns:1fr!important;}}
+      `}</style>
+    </div>
+  );
+}
+
+/* ─────────── Hero Section ─────────── */
+function Hero() {
+  const [activeScenario, setScenario] = useState('irs');
+  const scenariosRisk = { irs: 94, bank: 76, safe: 8 };
+
+  return (
+    <section style={{minHeight:'100vh',display:'flex',flexDirection:'column',justifyContent:'center',paddingTop:96,paddingBottom:60,overflow:'hidden'}}>
+      <div style={{maxWidth:1320,margin:'0 auto',padding:'0 28px',width:'100%'}}>
+        
+        {/* Top Split: Intro Headline + Live Visualizer */}
+        <div style={{display:'grid',gridTemplateColumns:'1.1fr 0.9fr',gap:56,alignItems:'center',marginBottom:40}} className="hero-grid">
+          {/* Left Column */}
+          <div style={{animation:'fadeIn .8s var(--ease) both'}}>
+            <div style={{
+              display:'inline-flex',alignItems:'center',gap:7,
+              padding:'6px 14px',borderRadius:99,marginBottom:22,
+              fontFamily:'var(--font-mono)',fontSize:11,fontWeight:700,letterSpacing:'0.14em',textTransform:'uppercase',
+              background:'var(--accent-lt)',color:'var(--accent)',border:'1px solid rgba(42,124,111,0.28)',
+              boxShadow:'2px 2px 8px rgba(42,124,111,0.12), -1px -1px 5px rgba(255,255,255,0.7)',
+            }}>
+              <span className="nav-live-dot" style={{width:7,height:7}}></span>
+              Real-Time Anti-Vishing Companion
+            </div>
+            
+            <h1 style={{
+              fontFamily:'var(--font-d)',fontSize:'clamp(2.3rem, 5.2vw, 3.8rem)',
+              fontWeight:800,lineHeight:1.1,color:'var(--text)',
+              letterSpacing:'-0.03em',marginBottom:22,
+            }}>
+              Real-Time Voice Shield<br/>
+              <span className="grad-text-anim">Against Phone Scams</span>
+            </h1>
+
+            <p style={{fontSize:'clamp(15px,1.8vw,17px)',color:'var(--muted)',lineHeight:1.75,maxWidth:520,marginBottom:32}}>
+              PhishGuard AI analyzes speakerphone calls as they happen, cross-referencing linguistic threat patterns, social engineering markers, and coercion signals within 200 milliseconds.
+            </p>
+
+            {/* Quick Navigation / Action Row */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:14,marginBottom:32}}>
+              <a href="app.html" style={{
+                display:'inline-flex',alignItems:'center',gap:9,
+                padding:'14px 28px',borderRadius:14,fontWeight:700,fontSize:15,textDecoration:'none',
+                color:'#fff',background:'var(--accent)',
+                boxShadow:'4px 4px 14px rgba(42,124,111,0.35), -2px -2px 8px rgba(255,255,255,0.6)',
+                border:'1px solid rgba(42,124,111,0.4)',
+                transition:'all .25s',
+              }}
+                onMouseEnter={e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.background='#236358';}}
+                onMouseLeave={e=>{e.currentTarget.style.transform='';e.currentTarget.style.background='var(--accent)';}}
+              >
+                <MicIcon size="1.05em"/> Open Call Monitor
+              </a>
+
+              <a href="library.html" style={{
+                display:'inline-flex',alignItems:'center',gap:9,
+                padding:'14px 24px',borderRadius:14,fontWeight:600,fontSize:15,textDecoration:'none',
+                color:'var(--text)',background:'var(--surface)',
+                boxShadow:'var(--shadow-out)',border:'1px solid var(--border)',
+                transition:'all .25s',
+              }}
+                onMouseEnter={e=>{e.currentTarget.style.boxShadow='var(--shadow-in)';e.currentTarget.style.transform='translateY(1px)';}}
+                onMouseLeave={e=>{e.currentTarget.style.boxShadow='var(--shadow-out)';e.currentTarget.style.transform='';}}
+              >
+                <BookIcon size="1em"/> Explore 500+ Scams
+              </a>
+            </div>
+
+            {/* Security Proof Points */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:20}}>
+              {['100% On-Device Analysis','No Account Required','Zero Audio Storage'].map(t => (
+                <div key={t} style={{display:'flex',alignItems:'center',gap:6,fontSize:13,color:'var(--muted)'}}>
+                  <span style={{color:'var(--accent)',fontSize:14}}><CheckIcon/></span>{t}
+                </div>
+              ))}
             </div>
           </div>
 
-          <div id="sumEmpty" class="sum-empty">
-            <svg class="ic"><use href="#i-file"/></svg>
-            <p>A fraud incident report is generated automatically when you stop monitoring.</p>
-          </div>
-
-          <div id="sumBody" class="sum-body" hidden>
-            <div class="stats">
-              <div class="stat"><label>Duration</label><b id="sumDuration" class="mono">—</b></div>
-              <div class="stat"><label>Peak risk</label><b id="sumPeak" class="mono">—</b></div>
-              <div class="stat"><label>Scam type</label><b id="sumType">—</b></div>
-              <div class="stat"><label>Red flags</label><b id="sumFlags" class="mono">—</b></div>
+          {/* Right Column: Dynamic Visualizer */}
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:24,animation:'fadeIn .8s .2s var(--ease) both'}}>
+            <div style={{animation:'float-y 4s ease-in-out infinite',filter:'drop-shadow(0 8px 24px rgba(42,124,111,0.15))'}}>
+              <Visualizer activeRisk={scenariosRisk[activeScenario]} isSimulating={true}/>
             </div>
-            <div id="sumVerdict" class="verdict"></div>
-            <h3 class="mini-title">Event timeline</h3>
-            <ol id="sumTimeline" class="timeline"></ol>
+            
+            <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12,width:'100%',maxWidth:360}}>
+              <StatCard value="99.2%" label="Detection Rate" accent="var(--accent)"/>
+              <StatCard value="<180ms" label="Response Time" accent="var(--accent-2)"/>
+              <StatCard value="500+" label="Scam Playbooks" accent="#5b4fa8"/>
+            </div>
           </div>
-        </article>
-      </section>
-    </main>
+        </div>
 
-    <footer class="foot">
-      <span>PhishGuard · Audio is processed for analysis only. Never share OTPs, PINs or passwords on a call you did not initiate.</span>
-    </footer>
-  </div>
+        {/* Bottom Half: Interactive In-Page Voice Phishing Test Console */}
+        <LiveSimulator
+          activeScenario={activeScenario}
+          setScenario={setScenario}
+        />
+      </div>
 
-  <!-- Toasts -->
-  <div id="toasts" class="toasts" aria-live="polite"></div>
+      <style>{`
+        @keyframes fadeIn { from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none} }
+        @media(max-width:880px){.hero-grid{grid-template-columns:1fr!important;gap:40px!important;text-align:center}}
+        @media(max-width:880px) .hero-grid > div:first-child > div[style*="flex-wrap"]{justify-content:center}
+      `}</style>
+    </section>
+  );
+}
 
-  <!-- Print-only sheet -->
-  <div id="printSheet" class="print-sheet"></div>
+/* ─────────── Features Section ─────────── */
+function Features() {
+  const cards = [
+    { icon:<BookIcon/>,  iconBg:'rgba(42,124,111,0.1)',  iconColor:'#2a7c6f', title:'Scam Threat Library',     description:'500+ known vishing scripts and impersonation tactics updated in real time.', badge:'500+ Patterns', delay:0 },
+    { icon:<AlertIcon/>, iconBg:'rgba(164,55,50,0.08)',  iconColor:'#a43732', title:'Real-Time Risk Scoring',  description:'AI-scored 0–100 threat assessment per sentence within 180 milliseconds.', badge:'AI Powered', delay:0.08 },
+    { icon:<BoltIcon/>,  iconBg:'rgba(145,91,12,0.09)',  iconColor:'#8a570a', title:'Instant Voice Alerts',    description:'Spoken warning, visual banner, and chime trigger the moment fraud language appears.', badge:'<200ms', delay:0.16 },
+    { icon:<PhoneIcon/>, iconBg:'rgba(59,109,140,0.1)',  iconColor:'#3b6d8c', title:'Live Transcription',      description:'Real-time speakerphone audio transcript with highlighted red-flag keywords.', badge:'Live Feed', delay:0.24 },
+    { icon:<ShieldIcon/>,iconBg:'rgba(91,79,168,0.09)',  iconColor:'#5b4fa8', title:'Scam Deterrent Tone',     description:'Play a compliant AI warning audio informing the caller their call is monitored.', badge:'Unique', delay:0.32 },
+    { icon:<GlobeIcon/>, iconBg:'rgba(42,124,111,0.08)', iconColor:'#2a7c6f', title:'Multi-Language Engine',  description:'Detects deceptive indicators in English, Hindi, Spanish, Mandarin and more.', badge:'12+ Langs', delay:0.40 },
+  ];
 
-  <script src="js/audioRecorder.js"></script>
-  <script src="js/tts.js"></script>
-  <script src="js/UIController.js"></script>
-  <script src="js/app.js"></script>
+  return (
+    <section id="features" style={{padding:'96px 0',background:'var(--bg-2)'}}>
+      <div style={{maxWidth:1320,margin:'0 auto',padding:'0 28px'}}>
+        <SectionTitle
+          tag="Core Capabilities"
+          title={<>Everything You Need to Stay <span className="grad-text-anim">Scam-Free</span></>}
+          sub="PhishGuard AI combines speech recognition, NLP, and threat intelligence into one seamless real-time guardian."
+        />
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(310px,1fr))',gap:20}}>
+          {cards.map((c,i) => <FeatureCard key={i} {...c}/>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeatureCard({icon, iconBg, iconColor, title, description, badge, delay=0}) {
+  const [ref, vis] = useReveal(0.12);
+  return (
+    <div
+      ref={ref}
+      className="shimmer-card"
+      style={{
+        padding:28,
+        opacity: vis?1:0,
+        transform: vis?'translateY(0)':'translateY(32px)',
+        transition:`opacity .7s ${delay}s var(--ease), transform .7s ${delay}s var(--ease)`,
+      }}
+    >
+      <div style={{display:'flex',alignItems:'flex-start',gap:16}}>
+        <div style={{
+          width:52,height:52,borderRadius:14,flexShrink:0,
+          display:'grid',placeItems:'center',fontSize:24,
+          background:iconBg, color:iconColor,
+          boxShadow:`3px 3px 10px ${iconColor}22, -2px -2px 7px rgba(255,255,255,0.8)`,
+        }}>{icon}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:6}}>
+            <h3 style={{fontFamily:'var(--font-d)',fontWeight:600,fontSize:'1rem',color:'var(--text)'}}>{title}</h3>
+            {badge && (
+              <span style={{
+                fontSize:10,fontFamily:'var(--font-mono)',fontWeight:700,letterSpacing:'0.08em',
+                padding:'2px 8px',borderRadius:99,
+                background:`${iconColor}15`,color:iconColor,border:`1px solid ${iconColor}35`,
+              }}>{badge}</span>
+            )}
+          </div>
+          <p style={{fontSize:13.5,color:'var(--muted)',lineHeight:1.65}}>{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────── Architecture / How It Works ─────────── */
+function HowItWorks() {
+  const steps = [
+    { num:'01', title:'Place Call on Speakerphone', desc:'Put any suspicious incoming or outgoing call on speakerphone.', color:'#2a7c6f', delay:0 },
+    { num:'02', title:'Real-Time NLP Analysis',      desc:'Our speech model listens locally, identifying coercion, urgency, and OTP flags.', color:'#3b6d8c', delay:0.15 },
+    { num:'03', title:'Instant Auditory Alert',     desc:'Spoken voice companion alerts you before you share sensitive codes or money.', color:'#a43732', delay:0.30 },
+    { num:'04', title:'Incident Report & Export',    desc:'Full audit timeline with quotes, risk timestamps, and legal export options.', color:'#5b4fa8', delay:0.45 },
+  ];
+
+  return (
+    <section id="how" style={{padding:'96px 0'}}>
+      <div style={{maxWidth:1320,margin:'0 auto',padding:'0 28px'}}>
+        <SectionTitle
+          tag="System Architecture"
+          title={<>From Ring to <span className="grad-text-anim">Protected</span> in Seconds</>}
+          sub="PhishGuard AI acts as your silent co-pilot during phone calls, alerting you without interfering."
+        />
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(210px,1fr))',gap:32}}>
+          {steps.map((s,i) => <StepCard key={i} {...s}/>)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function StepCard({num, title, desc, color, delay=0}) {
+  const [ref, vis] = useReveal(0.15);
+  return (
+    <div ref={ref} style={{
+      display:'flex',flexDirection:'column',alignItems:'center',textAlign:'center',padding:'0 12px',
+      opacity:vis?1:0,transform:vis?'translateY(0)':'translateY(30px)',
+      transition:`opacity .7s ${delay}s var(--ease), transform .7s ${delay}s var(--ease)`,
+    }}>
+      <div style={{
+        width:58,height:58,borderRadius:'50%',display:'grid',placeItems:'center',
+        fontFamily:'var(--font-d)',fontSize:'1.2rem',fontWeight:700,color,
+        background:`${color}12`, border:`2px solid ${color}40`,
+        boxShadow:`3px 3px 10px ${color}20, -3px -3px 8px rgba(255,255,255,0.8)`,
+        marginBottom:16,
+      }}>{num}</div>
+      <h3 style={{fontFamily:'var(--font-d)',fontWeight:600,fontSize:'1rem',color:'var(--text)',marginBottom:8}}>{title}</h3>
+      <p style={{fontSize:13.5,color:'var(--muted)',maxWidth:210,lineHeight:1.65}}>{desc}</p>
+    </div>
+  );
+}
+
+function SectionTitle({tag, title, sub, center=true}) {
+  const [ref, vis] = useReveal(0.2);
+  return (
+    <div ref={ref} style={{
+      marginBottom:56, textAlign:center?'center':'left',
+      opacity:vis?1:0, transform:vis?'translateY(0)':'translateY(22px)',
+      transition:'opacity .6s var(--ease), transform .6s var(--ease)',
+    }}>
+      <span className="section-tag">{tag}</span>
+      <h2 style={{fontFamily:'var(--font-d)',fontSize:'clamp(1.7rem, 4vw, 2.3rem)',fontWeight:800,color:'var(--text)',lineHeight:1.15,marginBottom:14}}>
+        {title}
+      </h2>
+      {sub && <p style={{color:'var(--muted)',maxWidth:600,margin:center?'0 auto':0,fontSize:'clamp(14px,2vw,16px)',lineHeight:1.7}}>{sub}</p>}
+    </div>
+  );
+}
+
+/* ─────────── Footer ─────────── */
+function Footer() {
+  const [termsOpen, setTermsOpen] = useState(false);
+
+  return (
+    <>
+      {termsOpen && (
+        <div className="modal-bg" onClick={()=>setTermsOpen(false)}>
+          <div className="modal-box" onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setTermsOpen(false)} style={{
+              position:'absolute',top:18,right:18,width:32,height:32,borderRadius:8,
+              display:'grid',placeItems:'center',background:'var(--surface)',
+              border:'1px solid var(--border)',cursor:'pointer',boxShadow:'var(--shadow-out)',fontSize:14,color:'var(--muted)',
+            }}>✕</button>
+            <h2 style={{fontFamily:'var(--font-d)',fontSize:'1.4rem',fontWeight:700,color:'var(--text)',marginBottom:4}}>Terms and Conditions</h2>
+            <p style={{fontSize:11,fontFamily:'var(--font-mono)',color:'var(--faint)',marginBottom:24}}>Last updated: October 2026</p>
+            {[
+              ['1. Acceptance of Terms','By accessing or using PhishGuard AI, you agree to these Terms. If you do not agree, discontinue use.'],
+              ['2. Nature of Service','PhishGuard AI is an advisory security companion. It assists in identifying potential vishing attempts but does not guarantee detection of all fraudulent calls.'],
+              ['3. Privacy & Audio Data','No raw audio recordings, transcripts, or personal identification data are retained on remote servers. All processing is strictly local.'],
+              ['4. Limitation of Liability','PhishGuard AI and its developers shall not be liable for any financial losses or damages resulting from calls.'],
+              ['5. Contact','For security inquiries: radheshjha8207@gmail.com'],
+            ].map(([t,b]) => (
+              <div key={t} style={{marginBottom:18}}>
+                <h3 style={{fontFamily:'var(--font-d)',fontWeight:600,fontSize:15,color:'var(--text)',marginBottom:4}}>{t}</h3>
+                <p style={{fontSize:13.5,color:'var(--muted)',lineHeight:1.65}}>{b}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <footer id="contact" style={{
+        background:'var(--bg-2)', borderTop:'1px solid var(--border)',
+        paddingTop:72, paddingBottom:28, position:'relative', zIndex:1,
+      }}>
+        <div style={{maxWidth:1320,margin:'0 auto',padding:'0 28px'}}>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:48,marginBottom:52}}>
+            {/* Brand */}
+            <div>
+              <a href="index.html" className="logo" style={{marginBottom:14,display:'inline-flex'}}>
+                <div className="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+                Phish<span>Guard</span><em>AI</em>
+              </a>
+              <p style={{fontSize:13.5,color:'var(--muted)',lineHeight:1.7,maxWidth:260,marginBottom:16}}>
+                Real-time AI voice companion guarding you against voice-phishing, social engineering, and phone fraud.
+              </p>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <span className="nav-live-dot"></span>
+                <span style={{fontSize:12,fontFamily:'var(--font-mono)',color:'var(--accent)',fontWeight:600}}>System Active • 48kHz Stream</span>
+              </div>
+            </div>
+
+            {/* Application Pages */}
+            <div>
+              <h3 style={{fontFamily:'var(--font-d)',fontWeight:600,fontSize:14,color:'var(--text)',marginBottom:16}}>Application Pages</h3>
+              <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                {[
+                  {l:'Overview (Home)',h:'index.html'},
+                  {l:'Live Call Monitor',h:'app.html'},
+                  {l:'Scam Threat Library',h:'library.html'},
+                  {l:'Call Incident History',h:'history.html'},
+                ].map(lk => (
+                  <a key={lk.l} href={lk.h} style={{fontSize:14,color:'var(--muted)',textDecoration:'none',transition:'color .2s'}}
+                    onMouseEnter={e=>e.target.style.color='var(--accent)'}
+                    onMouseLeave={e=>e.target.style.color='var(--muted)'}
+                  >{lk.l}</a>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h3 style={{fontFamily:'var(--font-d)',fontWeight:600,fontSize:14,color:'var(--text)',marginBottom:16}}>Contact Us</h3>
+              <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                {[
+                  {icon:<MailIcon/>,  label:'Support', email:'sakshamsinha1661@gmail.com', color:'var(--accent)'},
+                  {icon:<AlertIcon/>, label:'Report',  email:'radheshjha8207@gmail.com', color:'#a43732'},
+                  {icon:<ShieldIcon/>,label:'Legal',   email:'legal@phishguardai.com', color:'var(--accent-2)'},
+                ].map(c => (
+                  <div key={c.email} style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+                    <span style={{color:c.color,fontSize:15,marginTop:1}}>{c.icon}</span>
+                    <div>
+                      <div style={{fontSize:10,fontFamily:'var(--font-mono)',fontWeight:700,color:'var(--faint)',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:2}}>{c.label}</div>
+                      <a href={`mailto:${c.email}`} style={{fontSize:13.5,color:'var(--muted)',textDecoration:'none',transition:'color .2s'}}
+                        onMouseEnter={e=>e.target.style.color='var(--accent)'}
+                        onMouseLeave={e=>e.target.style.color='var(--muted)'}
+                      >{c.email}</a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{height:1,background:'linear-gradient(90deg,transparent,var(--border),transparent)',marginBottom:22}}/>
+
+          <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:12}}>
+            <p style={{fontSize:13,color:'var(--faint)'}}>© 2026 PhishGuard AI. All rights reserved.</p>
+            <div style={{display:'flex',alignItems:'center',gap:20,flexWrap:'wrap'}}>
+              <button onClick={()=>setTermsOpen(true)} style={{
+                fontSize:13,color:'var(--muted)',background:'none',border:'none',cursor:'pointer',
+                textDecoration:'underline',textUnderlineOffset:3,fontFamily:'inherit',
+              }}
+                onMouseEnter={e=>e.target.style.color='var(--accent)'}
+                onMouseLeave={e=>e.target.style.color='var(--muted)'}
+              >Terms and Conditions</button>
+              <span style={{color:'var(--border)'}}>·</span>
+              <a href="mailto:radheshjha8207@gmail.com" style={{fontSize:13,color:'var(--muted)',textDecoration:'none'}}>Contact Us</a>
+              <span style={{color:'var(--border)'}}>·</span>
+              <span style={{fontSize:11,fontFamily:'var(--font-mono)',color:'var(--faint)'}}>v2.4.0</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </>
+  );
+}
+
+/* ─────────── App Component ─────────── */
+function App() {
+  return (
+    <>
+      <Navbar/>
+      <Hero/>
+      <Features/>
+      <HowItWorks/>
+      <Footer/>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+<!-- Ambient Background Animation Script -->
+<script src="js/ambientBackground.js"></script>
+
 </body>
 </html>

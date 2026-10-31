@@ -13,7 +13,7 @@
   };
 
   const CAPTIONS = {
-    idle: "Start monitoring to analyse your call.",
+    idle: "Start monitoring to analyze the call.",
     safe: "No threat detected — conversation looks safe.",
     suspicious: "Suspicious behaviour detected — stay alert.",
     critical: "CRITICAL PHISHING DETECTED",
@@ -74,7 +74,9 @@
       this._level = 0;
       this._levels = new Array(64).fill(0);
       this._monitoring = false;
-      this._wavePhase = 0;
+      this._waveFrame = null;
+      this._drawWave = null;
+      this._reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       this._initWave();
     }
 
@@ -87,6 +89,9 @@
 
     setMonitoring(on, demo = false) {
       this._monitoring = on;
+      cancelAnimationFrame(this._waveFrame);
+      this._waveFrame = null;
+      this._drawWave();
       const e = this.el;
       e.statusPill.classList.toggle("is-live", on);
       e.statusText.textContent = on ? (demo ? "Demo running" : "Listening") : "Standby";
@@ -104,7 +109,7 @@
 
     setMode(demo) {
       this.el.modeChip.classList.toggle("is-demo", demo);
-      this.el.modeText.textContent = demo ? "Demo mode" : "Live mode";
+      this.el.modeText.textContent = demo ? "Demo scenario" : "Microphone";
     }
 
     setState(state, score, instant = false) {
@@ -161,7 +166,7 @@
         return;
       }
       e.badgeText.textContent = type;
-      e.badgeSub.textContent = "Scam style identified by AI";
+      e.badgeSub.textContent = "Pattern reported by analysis";
       const hit = SCAM_ICON.find(([re]) => re.test(type));
       e.badgeIcon.innerHTML = `<use href="#${hit ? hit[1] : "i-alert"}"/>`;
       if (prev !== type) {
@@ -276,7 +281,8 @@
         : '<li>No events recorded.</li>';
       e.btnDownload.disabled = false;
       e.btnPrint.disabled = false;
-      e.sumBody.closest(".card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+      e.sumBody.closest(".card").scrollIntoView({ behavior, block: "nearest" });
     }
 
     clearSummary() {
@@ -301,7 +307,10 @@
     }
 
     /* ---------- waveform ---------- */
-    setMicLevel(level) { this._level = level; }
+    setMicLevel(level) {
+      this._level = level;
+      if (this._monitoring && this._reduceMotion) this._drawWave();
+    }
 
     _initWave() {
       const c = this.el.canvas;
@@ -312,6 +321,7 @@
         c.width = Math.max(1, r.width * dpr);
         c.height = Math.max(1, r.height * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (this._drawWave && (this._reduceMotion || !this._monitoring)) this._drawWave();
       };
       resize();
       window.addEventListener("resize", resize);
@@ -323,24 +333,28 @@
         const w = r.width, h = r.height;
         ctx.clearRect(0, 0, w, h);
 
-        this._wavePhase += 0.04;
-        // push a new level sample (smoothed); idle shows a gentle breathing line
-        const target = this._monitoring ? this._level : 0.04 + 0.03 * Math.sin(this._wavePhase);
+        const target = this._monitoring ? this._level : 0;
         const last = this._levels[this._levels.length - 1];
         this._levels.push(last + (target - last) * 0.35);
         this._levels.shift();
 
         const rgb = cssRgb();
+        if (!this._monitoring) {
+          ctx.strokeStyle = `rgba(${rgb},0.55)`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, h / 2);
+          ctx.lineTo(w, h / 2);
+          ctx.stroke();
+          return;
+        }
+
         const n = this._levels.length;
         const gap = 4, barW = Math.max(2, w / n - gap);
-        const grad = ctx.createLinearGradient(0, 0, w, 0);
-        grad.addColorStop(0, `rgba(${rgb},0.25)`);
-        grad.addColorStop(1, `rgba(${rgb},0.95)`);
-        ctx.fillStyle = grad;
+        ctx.fillStyle = `rgba(${rgb},0.78)`;
 
         for (let i = 0; i < n; i++) {
-          const wobble = 0.65 + 0.35 * Math.sin(i * 0.7 + this._wavePhase * 2);
-          const bh = Math.max(3, this._levels[i] * h * 0.9 * wobble + 3);
+          const bh = Math.max(3, this._levels[i] * h * 0.9);
           const x = i * (w / n) + gap / 2;
           const y = (h - bh) / 2;
           const rad = barW / 2;
@@ -348,8 +362,9 @@
           if (ctx.roundRect) ctx.roundRect(x, y, barW, bh, rad); else ctx.rect(x, y, barW, bh);
           ctx.fill();
         }
-        requestAnimationFrame(draw);
+        if (!this._reduceMotion) this._waveFrame = requestAnimationFrame(draw);
       };
+      this._drawWave = draw;
       draw();
     }
   }
